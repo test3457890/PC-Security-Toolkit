@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="midnight">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="toolkit-token" content="%%TOOLKIT-TOKEN%%">
+<title>PC Security Toolkit</title>
+<script>
+  // Apply the saved theme before the page paints (no flash of the wrong colors).
+  try { const t = localStorage.getItem('toolkit-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<style>
+  /* ================= THEMES ================= */
+  :root, [data-theme="midnight"] {
+    --bg:#0b1120; --card:#162033; --panel:rgba(2,6,23,.45); --border:#2a3950;
+    --text:#f1f5f9; --muted:#94a3b8; --accent:#38bdf8; --accent-ink:#0f172a; --accent-soft:rgba(56,189,248,.16);
+    --green:#22c55e; --green-ink:#052e16; --amber:#f59e0b; --amber-ink:#451a03; --red:#ef4444; --red-ink:#fff; --orange:#f97316;
+    --ok-text:#4ade80; --bad-text:#f87171; --ok-soft:rgba(34,197,94,.2); --bad-soft:rgba(239,68,68,.2);
+    --code-bg:#020617; --code-text:#e2e8f0; --sec:#334155; --sec-ink:#f8fafc; --chip:#1e293b; --backdrop:rgba(2,6,23,.78);
+    --font:'Segoe UI', system-ui, sans-serif; --mono:Consolas, 'Cascadia Mono', monospace; --head-font:var(--font);
+    --radius:12px; --radius-sm:8px; --glow:none; --bw:1px; color-scheme: dark;
+  }
+  [data-theme="hacker"] {
+    --bg:#000; --card:#020a03; --panel:rgba(0,40,10,.35); --border:#0f5f24;
+    --text:#86ffa6; --muted:#35c463; --accent:#00ff41; --accent-ink:#000; --accent-soft:rgba(0,255,65,.12);
+    --green:#00ff41; --green-ink:#000; --amber:#d4ff00; --amber-ink:#000; --red:#ff3b3b; --red-ink:#000; --orange:#ffb000;
+    --ok-text:#00ff41; --bad-text:#ff5555; --ok-soft:rgba(0,255,65,.12); --bad-soft:rgba(255,59,59,.15);
+    --code-bg:#000; --code-text:#00ff41; --sec:#062b10; --sec-ink:#86ffa6; --chip:#03150a; --backdrop:rgba(0,0,0,.85);
+    --font:Consolas, 'Cascadia Mono', 'Courier New', monospace; --head-font:var(--font);
+    --radius:2px; --radius-sm:2px; --glow:0 0 6px rgba(0,255,65,.6); color-scheme: dark;
+  }
+  [data-theme="light"] {
+    --bg:#f4f6fb; --card:#ffffff; --panel:#f1f5f9; --border:#d6dce8;
+    --text:#0f172a; --muted:#5b6475; --accent:#0369a1; --accent-ink:#fff; --accent-soft:rgba(3,105,161,.1);
+    --green:#15803d; --green-ink:#fff; --amber:#b45309; --amber-ink:#fff; --red:#b91c1c; --red-ink:#fff; --orange:#c2410c;
+    --ok-text:#15803d; --bad-text:#b91c1c; --ok-soft:rgba(21,128,61,.12); --bad-soft:rgba(185,28,28,.1);
+    --code-bg:#0f172a; --code-text:#e2e8f0; --sec:#e2e8f0; --sec-ink:#0f172a; --chip:#eef2f7; --backdrop:rgba(15,23,42,.45);
+    color-scheme: light;
+  }
+  [data-theme="cyberpunk"] {
+    --bg:#0d0221; --card:#1a0b3a; --panel:rgba(255,42,109,.06); --border:#3d1a78;
+    --text:#f5e9ff; --muted:#b9a3d9; --accent:#ff2a6d; --accent-ink:#0d0221; --accent-soft:rgba(255,42,109,.16);
+    --green:#05d9e8; --green-ink:#0d0221; --amber:#f9f871; --amber-ink:#0d0221; --red:#ff3864; --red-ink:#fff; --orange:#ff9f1c;
+    --ok-text:#05d9e8; --bad-text:#ff6b9a; --ok-soft:rgba(5,217,232,.15); --bad-soft:rgba(255,56,100,.18);
+    --code-bg:#07011a; --code-text:#d1f7ff; --sec:#2a1059; --sec-ink:#f5e9ff; --chip:#22104a; --backdrop:rgba(13,2,33,.85);
+    --head-font:'Segoe UI Black','Arial Black', system-ui, sans-serif; --radius:6px; --radius-sm:4px; --glow:0 0 10px rgba(255,42,109,.5);
+    color-scheme: dark;
+  }
+  [data-theme="amber"] {
+    --bg:#140c02; --card:#1e1306; --panel:rgba(255,176,0,.05); --border:#4a3108;
+    --text:#ffcc66; --muted:#c08a2e; --accent:#ffb000; --accent-ink:#140c02; --accent-soft:rgba(255,176,0,.14);
+    --green:#a3e635; --green-ink:#140c02; --amber:#ffb000; --amber-ink:#140c02; --red:#ff5f3b; --red-ink:#140c02; --orange:#ff8c1a;
+    --ok-text:#c6f36b; --bad-text:#ff7a5c; --ok-soft:rgba(163,230,53,.12); --bad-soft:rgba(255,95,59,.14);
+    --code-bg:#0c0701; --code-text:#ffcc66; --sec:#3a2606; --sec-ink:#ffcc66; --chip:#2a1b05; --backdrop:rgba(10,6,0,.85);
+    --font:'Lucida Console', Consolas, monospace; --head-font:var(--font); --radius:3px; --radius-sm:2px; --glow:0 0 6px rgba(255,176,0,.45);
+    color-scheme: dark;
+  }
+  [data-theme="ocean"] {
+    --bg:#03141f; --card:#06283a; --panel:rgba(0,0,0,.2); --border:#0e4d68;
+    --text:#e6f7ff; --muted:#8fc3d9; --accent:#2dd4bf; --accent-ink:#022c2b; --accent-soft:rgba(45,212,191,.15);
+    --green:#34d399; --green-ink:#022c22; --amber:#fbbf24; --amber-ink:#3b2500; --red:#fb7185; --red-ink:#2a0710; --orange:#fb923c;
+    --ok-text:#6ee7b7; --bad-text:#fda4af; --ok-soft:rgba(52,211,153,.15); --bad-soft:rgba(251,113,133,.15);
+    --code-bg:#011018; --code-text:#d5f5ff; --sec:#0b3b52; --sec-ink:#e6f7ff; --chip:#083248; --backdrop:rgba(1,10,16,.8);
+    --radius:16px; --radius-sm:10px; color-scheme: dark;
+  }
+  [data-theme="contrast"] {
+    --bg:#000; --card:#000; --panel:#000; --border:#fff;
+    --text:#fff; --muted:#e5e5e5; --accent:#ffff00; --accent-ink:#000; --accent-soft:rgba(255,255,0,.2);
+    --green:#00ff00; --green-ink:#000; --amber:#ffff00; --amber-ink:#000; --red:#ff4d4d; --red-ink:#000; --orange:#ffa500;
+    --ok-text:#00ff00; --bad-text:#ff6b6b; --ok-soft:#003300; --bad-soft:#330000;
+    --code-bg:#000; --code-text:#fff; --sec:#fff; --sec-ink:#000; --chip:#000; --backdrop:rgba(0,0,0,.9);
+    --radius:4px; --radius-sm:4px; --bw:2px; color-scheme: dark;
+  }
+
+  /* ================= BASE ================= */
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.5; }
+  .container { max-width: 1380px; margin: 0 auto; padding: 18px 16px 48px; position: relative; z-index: 1; }
+  code { font-family: var(--mono); background: var(--panel); padding: 1px 5px; border-radius: 4px; }
+  header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 14px; border-bottom: var(--bw) solid var(--border); margin-bottom: 16px; }
+  header h1 { margin: 0; font-size: 1.45rem; font-family: var(--head-font); text-shadow: var(--glow); }
+  header p { margin: 3px 0 0; color: var(--muted); font-size: 0.86rem; }
+  .head-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .btn { border: none; border-radius: var(--radius-sm); padding: 8px 14px; font-weight: 600; font-size: 0.84rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: opacity .15s, transform .1s; font-family: inherit; }
+  .btn:hover { opacity: .9; } .btn:active { transform: scale(.98); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-green { background: var(--green); color: var(--green-ink); }
+  .btn-amber { background: var(--amber); color: var(--amber-ink); }
+  .btn-red { background: var(--red); color: var(--red-ink); }
+  .btn-sec { background: var(--sec); color: var(--sec-ink); }
+  .btn-sm { padding: 4px 9px; font-size: 0.74rem; }
+  .static-banner { display: none; background: var(--accent-soft); border: var(--bw) solid var(--amber); padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.9rem; }
+
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .tab-btn { background: var(--card); border: var(--bw) solid var(--border); color: var(--muted); padding: 9px 14px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; font-size: 0.86rem; font-family: inherit; }
+  .tab-btn.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); text-shadow: var(--glow); }
+  .tab-panel { display: none; } .tab-panel.active { display: block; }
+
+  .card { background: var(--card); border: var(--bw) solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 12px; font-size: 1.05rem; color: var(--accent); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; font-family: var(--head-font); text-shadow: var(--glow); }
+  .card h3 { margin: 14px 0 8px; font-size: 0.95rem; }
+  .h-left { display: flex; align-items: center; gap: 8px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+  @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+  .muted { color: var(--muted); } .small { font-size: 0.8rem; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .table-wrap { overflow-x: auto; }
+
+  .info-btn { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); font-size: .74rem; font-weight: 800; cursor: pointer; flex-shrink: 0; font-family: inherit; padding: 0; }
+  .info-btn:hover { background: var(--accent); color: var(--accent-ink); }
+
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: var(--backdrop); z-index: 9999; align-items: center; justify-content: center; padding: 16px; }
+  .modal-backdrop.open { display: flex; }
+  .modal-card { background: var(--card); border: var(--bw) solid var(--accent); border-radius: var(--radius); max-width: 620px; width: 100%; padding: 20px 22px; box-shadow: 0 20px 50px rgba(0,0,0,.5); max-height: 90vh; overflow: auto; }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; }
+  .modal-head h3 { margin: 0; color: var(--accent); font-size: 1.15rem; }
+  .modal-box { background: var(--panel); border: var(--bw) solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 10px; font-size: .86rem; }
+
+  .score-wrap { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .score-circle { width: 120px; height: 120px; border-radius: 50%; border: 6px solid var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--panel); flex-shrink: 0; box-shadow: var(--glow); }
+  .score-num { font-size: 2rem; font-weight: 800; line-height: 1; }
+  .stat-pill { background: var(--panel); border: var(--bw) solid var(--border); border-radius: var(--radius-sm); padding: 6px 10px; font-size: .82rem; display: inline-block; margin: 3px 6px 3px 0; }
+  .finding { background: var(--panel); border-left: 4px solid var(--amber); padding: 8px 10px; border-radius: 6px; font-size: .84rem; margin-bottom: 8px; }
+  .finding.CRITICAL { border-left-color: var(--red); } .finding.HIGH { border-left-color: var(--orange); }
+  .finding.LOW { border-left-color: var(--accent); } .finding.OK { border-left-color: var(--green); }
+
+  .chat-box { background: var(--code-bg); border: var(--bw) solid var(--border); border-radius: var(--radius-sm); padding: 12px; height: 300px; overflow-y: auto; font-size: .86rem; margin-bottom: 10px; }
+  .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: var(--radius-sm); max-width: 92%; white-space: pre-wrap; }
+  .msg.user { background: var(--accent-soft); margin-left: auto; }
+  .msg.bot { background: var(--card); border: var(--bw) solid var(--border); }
+  .chat-input-row { display: flex; gap: 8px; }
+  input[type=text], input[type=password], textarea, select { background: var(--code-bg); border: var(--bw) solid var(--border); color: var(--text); padding: 8px 11px; border-radius: var(--radius-sm); font-size: .88rem; font-family: inherit; }
+  [data-theme="light"] input[type=text], [data-theme="light"] input[type=password], [data-theme="light"] textarea, [data-theme="light"] select { background: #fff; color: var(--text); }
+  .chat-input-row input { flex: 1; min-width: 0; }
+  textarea { width: 100%; min-height: 80px; resize: vertical; }
+  .quick-qs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .q-chip { background: var(--chip); border: var(--bw) solid var(--border); color: var(--muted); padding: 4px 9px; border-radius: 999px; font-size: .76rem; cursor: pointer; font-family: inherit; }
+  .q-chip:hover { color: var(--text); border-color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: var(--bw) solid var(--border); vertical-align: top; }
+  th { color: var(--accent); font-weight: 600; }
+  .mono { font-family: var(--mono); font-size: .76rem; }
+  .wrap { word-break: break-all; }
+
+  .status-tile { background: var(--panel); border: var(--bw) solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; font-size: .84rem; gap: 8px; }
+  .tile-left { display: flex; align-items: center; gap: 7px; }
+  .badge { padding: 2px 8px; border-radius: 999px; font-size: .74rem; font-weight: 700; white-space: nowrap; display: inline-block; }
+  .badge-on { background: var(--ok-soft); color: var(--ok-text); }
+  .badge-off { background: var(--bad-soft); color: var(--bad-text); }
+  .badge-info { background: var(--accent-soft); color: var(--accent); }
+
+  .profiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .profile-btn { background: var(--card); border: 2px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: var(--radius-sm); cursor: pointer; text-align: left; font-family: inherit; }
+  .profile-btn.active { border-color: var(--accent); background: var(--accent-soft); }
+  .profile-title { font-weight: 700; font-size: .92rem; display: block; }
+  .profile-desc { font-size: .75rem; color: var(--muted); display: block; }
+  .opt-item { display: flex; align-items: flex-start; gap: 9px; padding: 6px 8px; border-radius: var(--radius-sm); cursor: pointer; }
+  .opt-item:hover { background: var(--panel); }
+  .opt-item input { margin-top: 3px; width: 15px; height: 15px; accent-color: var(--accent); flex-shrink: 0; }
+  .opt-label { font-size: .88rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+  .opt-sub { font-size: .76rem; color: var(--muted); display: block; }
+  pre { background: var(--code-bg); border: var(--bw) solid var(--border); border-radius: var(--radius-sm); padding: 12px; font-family: var(--mono); font-size: .75rem; color: var(--code-text); max-height: 460px; overflow: auto; white-space: pre-wrap; margin: 0; }
+  .toast { display: none; color: var(--ok-text); font-size: .85rem; font-weight: 600; max-width: 420px; }
+
+  /* Family + recovery */
+  .cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+  .cat { background: var(--panel); border: var(--bw) solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; }
+  .cat.on { border-color: var(--accent); background: var(--accent-soft); }
+  .cat input { margin-top: 4px; accent-color: var(--accent); }
+  .kid { background: var(--panel); border: var(--bw) solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 10px; }
+  .kid-head { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .kid-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px 16px; margin-top: 10px; font-size: .85rem; }
+  .kid-grid label { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .lock-card { max-width: 420px; margin: 30px auto; text-align: center; }
+  .pin-input { font-size: 1.6rem; letter-spacing: .4em; text-align: center; width: 220px; }
+  .snap { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 9px 0; border-bottom: var(--bw) solid var(--border); font-size: .86rem; }
+  .tool-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+  .tool { background: var(--panel); border: var(--bw) solid var(--border); border-radius: var(--radius-sm); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .tool b { font-size: .9rem; } .tool span { font-size: .8rem; color: var(--muted); flex: 1; }
+  .steps { margin: 6px 0 0; padding-left: 20px; font-size: .86rem; } .steps li { margin-bottom: 4px; }
+
+  /* Theme picker */
+  .theme-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+  .theme-card { border: 2px solid var(--border); border-radius: 10px; padding: 0; cursor: pointer; overflow: hidden; text-align: left; background: none; color: inherit; font-family: inherit; }
+  .theme-card.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .theme-swatch { height: 64px; display: flex; align-items: flex-end; padding: 8px; gap: 5px; }
+  .theme-swatch i { width: 16px; height: 16px; border-radius: 50%; display: block; border: 1px solid rgba(255,255,255,.25); }
+  .theme-name { padding: 8px 10px; font-weight: 700; font-size: .86rem; background: var(--panel); }
+  .theme-name small { display: block; font-weight: 400; color: var(--muted); font-size: .74rem; }
+
+  /* Hacker extras */
+  #rain { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .6s; }
+  [data-theme="hacker"] #rain { opacity: .13; }
+  [data-theme="hacker"] body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 2; background: repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0, rgba(0,0,0,.18) 1px, transparent 1px, transparent 3px); }
+  [data-theme="hacker"] header h1::before { content: "root@toolkit:~# "; color: var(--muted); }
+  [data-theme="hacker"] header h1::after, [data-theme="amber"] header h1::after { content: "\2588"; margin-left: 4px; animation: blink 1s steps(1) infinite; }
+  [data-theme="hacker"] .card, [data-theme="cyberpunk"] .card { box-shadow: inset 0 0 0 1px rgba(255,255,255,.02), 0 0 18px rgba(0,0,0,.4); }
+  [data-theme="cyberpunk"] .card { border-top: 2px solid var(--accent); }
+  [data-theme="amber"] body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 2; background: repeating-linear-gradient(0deg, rgba(0,0,0,.15) 0, rgba(0,0,0,.15) 1px, transparent 1px, transparent 3px); }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { header h1::after { animation: none !important; } }
+  @media (max-width: 600px) { header h1 { font-size: 1.15rem; } [data-theme="hacker"] header h1::before { content: "# "; } }
+</style>
+</head>
+<body>
+<canvas id="rain" aria-hidden="true"></canvas>
+<div class="container">
+  <header>
+    <div>
+      <h1>PC Security Toolkit</h1>
+      <p id="serverStatus">Checking the local USB server...</p>
+    </div>
+    <div class="head-actions">
+      <span id="toast" class="toast" role="status"></span>
+      <button class="btn btn-sec" onclick="openThemes()">🎨 Themes</button>
+      <button class="btn btn-primary" onclick="runLiveScan()">🔍 Rescan PC</button>
+      <button class="btn btn-amber" onclick="launchHitmanPro()">🛡️ Run HitmanPro</button>
+      <button class="btn btn-sec" onclick="saveReport()">📄 Save Report</button>
+      <button class="btn btn-red" id="stopBtn" onclick="shutdownServer()" style="display:none;">⏹️ Stop Server</button>
+    </div>
+  </header>
+
+  <div class="static-banner" id="staticBanner">
+    <strong>⚠️ You opened the HTML file directly.</strong> Live scanning and 1-click controls need the local server. Double-click <code>START HERE Windows.bat</code> (Windows), <code>START HERE Mac.command</code> (Mac) or <code>START HERE Linux.sh</code> (Linux) in the toolkit folder instead. The Script Builder tab still works offline.
+  </div>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab-btn active" data-tab="tab1">📊 Overview & Advisor</button>
+    <button class="tab-btn" data-tab="tab2">💾 Storage</button>
+    <button class="tab-btn" data-tab="tab3">🛡️ Backdoors, Ports & Extensions</button>
+    <button class="tab-btn" data-tab="tab4">🔒 Privacy & Network</button>
+    <button class="tab-btn" data-tab="tab5">⚙️ Script Builder</button>
+    <button class="tab-btn" data-tab="tab6">📱 iPad, iPhone & Android</button>
+    <button class="tab-btn" data-tab="tab7">👨‍👩‍👧 Family Plan</button>
+    <button class="tab-btn" data-tab="tab8">🛟 Recovery Mode</button>
+    <button class="tab-btn" data-tab="tab9">📄 Reports & Logs</button>
+  </nav>
+
+  <!-- TAB 1: OVERVIEW -->
+  <section id="tab1" class="tab-panel active">
+    <div class="grid-2">
+      <div>
+        <div class="card">
+          <h2><span class="h-left">System Health & Security Score <button class="info-btn" onclick="showInfo('score')">i</button></span><span id="scoreTrend" class="small muted"></span></h2>
+          <div class="score-wrap">
+            <div class="score-circle" id="scoreCircle"><div class="score-num" id="scoreNum">--</div><div class="small muted">/ 100</div></div>
+            <div style="flex:1; min-width:220px;">
+              <div id="sysIdentity" style="font-weight:700; font-size:1.02rem; margin-bottom:6px;">Waiting for scan...</div>
+              <div id="statsRow"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h2><span class="h-left">Detected Issues & Recommendations <button class="info-btn" onclick="showInfo('findings')">i</button></span></h2>
+          <div id="findingsList"><p class="muted">Waiting for live scan...</p></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2><span class="h-left">💬 Ask the Offline Advisor <button class="info-btn" onclick="showInfo('advisor')">i</button></span> <span id="aiBadge" class="small muted" style="font-weight:500;">Rule engine ready</span></h2>
+        <div class="quick-qs">
+          <button class="q-chip" onclick="askPreset('Is this computer safe or infected?')">Is this PC infected?</button>
+          <button class="q-chip" onclick="askPreset('Is this PC safe for public Wi-Fi?')">Safe for public Wi-Fi?</button>
+          <button class="q-chip" onclick="askPreset('Why is this computer slow?')">Why is it slow?</button>
+          <button class="q-chip" onclick="askPreset('How do I set up parental controls for my kids?')">Set up the Family Plan</button>
+          <button class="q-chip" onclick="askPreset('How do I undo changes / recovery?')">How do I undo changes?</button>
+          <button class="q-chip" onclick="askPreset('How do I scan my iPad?')">Scan my iPad</button>
+          <button class="q-chip" onclick="askPreset('What should I do on a friend\'s computer?')">Friend's PC checklist</button>
+          <button class="q-chip" onclick="askPreset('Are there any open ports or backdoors?')">Any backdoors?</button>
+        </div>
+        <div class="chat-box" id="chatBox" aria-live="polite">
+          <div class="msg bot">Hi! Click any ⓘ icon for a plain-English explanation, or ask me anything about this computer, your iPad, the Family Plan, or Recovery Mode.</div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Ask about ports, Wi-Fi, storage, kids, iPad, undoing changes..." onkeydown="if(event.key==='Enter') sendChat()">
+          <button class="btn btn-primary" onclick="sendChat()">Ask</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 2: STORAGE -->
+  <section id="tab2" class="tab-panel">
+    <div class="grid-2">
+      <div class="card">
+        <h2><span class="h-left">Safe Caches & Upgrade Leftovers <button class="info-btn" onclick="showInfo('caches')">i</button></span>
+          <span class="row"><button class="btn btn-sec btn-sm" onclick="openThing('cleanmgr')">🧽 Disk Cleanup</button><button class="btn btn-green btn-sm" onclick="cleanCachesNow()">🧹 Clean Safe Caches</button></span></h2>
+        <div class="table-wrap"><table id="cacheTable"><thead><tr><th>Location</th><th>Size</th><th>How to clean</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="card">
+        <h2><span class="h-left">Largest Items in Downloads (over 100 MB) <button class="info-btn" onclick="showInfo('downloads')">i</button></span></h2>
+        <div class="table-wrap"><table id="dlTable"><thead><tr><th>Name</th><th>Type</th><th>Size (GB)</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 3: BACKDOORS -->
+  <section id="tab3" class="tab-panel">
+    <div class="grid-2">
+      <div class="card">
+        <h2><span class="h-left">Listening Ports (reachable from the network) <button class="info-btn" onclick="showInfo('ports')">i</button></span></h2>
+        <div class="table-wrap"><table id="portTable"><thead><tr><th>Local IP</th><th>Port</th><th>Program</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="card">
+        <h2><span class="h-left">Programs Talking to the Internet <button class="info-btn" onclick="showInfo('outbound')">i</button></span></h2>
+        <div class="table-wrap"><table id="outTable"><thead><tr><th>Remote IP</th><th>Port</th><th>Program</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h2><span class="h-left">Startup Apps (<span id="startupCount">0</span>) <button class="info-btn" onclick="showInfo('startup')">i</button></span></h2>
+        <div class="table-wrap"><table id="startupTable"><thead><tr><th>Name</th><th>Command</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="card">
+        <h2><span class="h-left">Backdoor Checks & Risky Browser Extensions <button class="info-btn" onclick="showInfo('backdoors')">i</button></span></h2>
+        <div id="backdoorBox" style="margin-bottom:12px; font-size:.86rem;"></div>
+        <div class="table-wrap"><table id="extTable"><thead><tr><th>Browser</th><th>Extension</th><th>ID</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 4: PRIVACY -->
+  <section id="tab4" class="tab-panel">
+    <div class="card">
+      <h2><span class="h-left">Live Security & Privacy Control Matrix <button class="info-btn" onclick="showInfo('matrix')">i</button></span></h2>
+      <div class="grid-3" id="controlsGrid"><p class="muted">Waiting for live scan...</p></div>
+    </div>
+  </section>
+
+  <!-- TAB 5: SCRIPT BUILDER -->
+  <section id="tab5" class="tab-panel">
+    <div class="profiles">
+      <button class="profile-btn" onclick="applyPreset('travel', this)"><span class="profile-title">✈️ Travel Mode</span><span class="profile-desc">Max public Wi-Fi lock, 10 min screen lock, USB AutoRun off.</span></button>
+      <button class="profile-btn active" onclick="applyPreset('school', this)"><span class="profile-title">🎓 School Laptop</span><span class="profile-desc">Campus Wi-Fi safe, dev tools and recent docs intact.</span></button>
+      <button class="profile-btn" onclick="applyPreset('work', this)"><span class="profile-title">💼 Work / Office</span><span class="profile-desc">M365, Teams and VPN safe; blocks telemetry and browser passwords.</span></button>
+      <button class="profile-btn" onclick="applyPreset('gaming', this)"><span class="profile-title">🎮 Gaming & GNS3 Lab</span><span class="profile-desc">Keeps games, anti-cheats and GNS3/VMs intact.</span></button>
+      <button class="profile-btn" onclick="applyPreset('audit', this)"><span class="profile-title">🔍 Friend PC Audit</span><span class="profile-desc">Read-only check; changes zero settings.</span></button>
+    </div>
+    <div class="grid-2">
+      <div id="optionsContainer">
+        <div class="card"><h2>Safety & Storage</h2>
+          <label class="opt-item"><input type="checkbox" id="restorePoint" checked onchange="generate()"><span><span class="opt-label">Create System Restore Point <button class="info-btn" onclick="event.preventDefault();showInfo('restorePoint')">i</button></span><span class="opt-sub">A recovery snapshot is also saved to the USB automatically.</span></span></label>
+          <label class="opt-item"><input type="checkbox" id="storageSense" checked onchange="generate()"><span><span class="opt-label">Enable Storage Sense & Clean Safe Caches <button class="info-btn" onclick="event.preventDefault();showInfo('caches')">i</button></span><span class="opt-sub">Temp, npm cache, .cache, NuGet, Playwright.</span></span></label>
+          <label class="opt-item"><input type="checkbox" id="ssdTrim" checked onchange="generate()"><span><span class="opt-label">Run SSD ReTrim <button class="info-btn" onclick="event.preventDefault();showInfo('ssdTrim')">i</button></span><span class="opt-sub">Restores NVMe/SSD write speed.</span></span></label>
+          <label class="opt-item"><input type="checkbox" id="oneDriveOnDemand" onchange="generate()"><span><span class="opt-label">OneDrive Cloud-Only (Free Up Space) <button class="info-btn" onclick="event.preventDefault();showInfo('oneDrive')">i</button></span><span class="opt-sub">Frees space without deleting files.</span></span></label>
+        </div>
+        <div class="card"><h2>Privacy, Security & Apps</h2>
+          <label class="opt-item"><input type="checkbox" id="defenderCore" checked onchange="generate()"><span><span class="opt-label">Defender Real-Time, PUA & Network Protection <button class="info-btn" onclick="event.preventDefault();showInfo('ctrl_defender')">i</button></span></span></label>
+          <label class="opt-item"><input type="checkbox" id="defenderAsrAudit" checked onchange="generate()"><span><span class="opt-label">12 Defender ASR Rules (Audit Mode Only) <button class="info-btn" onclick="event.preventDefault();showInfo('asr')">i</button></span></span></label>
+          <label class="opt-item"><input type="checkbox" id="firewallOn" checked onchange="generate()"><span><span class="opt-label">Make Sure Windows Firewall Is On <button class="info-btn" onclick="event.preventDefault();showInfo('ctrl_firewall')">i</button></span></span></label>
+          <label class="opt-item"><input type="checkbox" id="blockRecall" checked onchange="generate()"><span><span class="opt-label">Block Windows Recall Screenshots <button class="info-btn" onclick="event.preventDefault();showInfo('ctrl_recall')">i</button></span></span></label>
+          <label class="opt-item"><input type="checkbox" id="blockTyping" checked onchange="generate()"><span><span class="opt-label">Block Typing & Inking Harvesting <button class="info-btn" onclick="event.preventDefault();showInfo('ctrl_typing')">i</button></span></span></label>
+          <label class="opt-item"><input type="checkbox" id="blockBingSearch" checked onchange="generate()"><span><span class="opt-label">Stop Start Menu Bing Keystroke Streaming <button class="info-btn" onclick="event.preventDefault();showInfo('ctrl_bing')">i</button></span></span></label>
+          <label class="opt-item"><input type="checkbox" id="blockClipboardVoice" checked onchange="generate()"><span><span class="opt-label">Disable Cloud Clipboard & Ad ID <button class="info-btn" onclick="event.preventDefault();showInfo('ctrl_clip')">i</button></span></span></label>
+          <label class="opt-item"><input type="checkbox" id="keepRecentDocs" checked onchange="generate()"><span><span class="opt-label">Keep Start Menu Recent Docs ON</span></span></label>
+          <label class="opt-item"><input type="checkbox" id="stopSpoofing" checked onchange="generate()"><span><span class="opt-label">Disable LLMNR, Wi-Fi NetBIOS (139), WPAD & NTLMv1 <button class="info-btn" onclick="event.preventDefault();showInfo('ctrl_llmnr')">i</button></span></span></label>
+          <label class="opt-item"><input type="checkbox" id="usbAutorun" checked onchange="generate()"><span><span class="opt-label">Disable USB AutoRun & AutoPlay <button class="info-btn" onclick="event.preventDefault();showInfo('ctrl_usb')">i</button></span></span></label>
+          <label class="opt-item"><input type="checkbox" id="disableRemote" checked onchange="generate()"><span><span class="opt-label">Disable Remote Assistance, RDP, WinRM & LMS <button class="info-btn" onclick="event.preventDefault();showInfo('ctrl_remote')">i</button></span></span></label>
+          <label class="opt-item"><input type="checkbox" id="disableGuest" checked onchange="generate()"><span><span class="opt-label">Disable the Guest Account</span></span></label>
+          <label class="opt-item"><input type="checkbox" id="doSvcHttp" checked onchange="generate()"><span><span class="opt-label">Stop Windows Update P2P Sharing <button class="info-btn" onclick="event.preventDefault();showInfo('ctrl_dosvc')">i</button></span></span></label>
+          <label class="opt-item"><input type="checkbox" id="screenLock" checked onchange="generate()"><span><span class="opt-label">Auto Screen Lock (10 min battery / 15 min plugged in)</span></span></label>
+          <label class="opt-item"><input type="checkbox" id="blockPublicPorts" checked onchange="generate()"><span><span class="opt-label">Block Database (3306) & CDP (5040) on Public Wi-Fi</span></span></label>
+          <label class="opt-item"><input type="checkbox" id="dbManual" checked onchange="generate()"><span><span class="opt-label">Set MySQL, SQL Server & Maps services to Manual</span></span></label>
+          <label class="opt-item"><input type="checkbox" id="browserPolicy" checked onchange="generate()"><span><span class="opt-label">Disable Edge/Chrome Password Manager & Background Mode</span></span></label>
+          <label class="opt-item"><input type="checkbox" id="filmoraLockdown" onchange="generate()"><span><span class="opt-label">Wondershare Filmora Offline Isolation (If Installed)</span></span></label>
+          <label class="opt-item"><input type="checkbox" id="sasCookiesOnly" onchange="generate()"><span><span class="opt-label">SUPERAntiSpyware On-Demand Only</span></span></label>
+          <label class="opt-item"><input type="checkbox" id="gns3Keep" onchange="generate()"><span><span class="opt-label">Keep GNS3 Labs Working on Private LAN</span></span></label>
+          <label class="opt-item"><input type="checkbox" id="wingetUpdate" onchange="generate()"><span><span class="opt-label">Silently Update Apps with Winget</span></span></label>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Run or Download Your Script</h2>
+        <div class="row" style="margin-bottom:12px;">
+          <button class="btn btn-green" id="runLiveBtn" onclick="executeLive()">⚡ Run Selected Modules Now</button>
+          <button class="btn btn-primary" onclick="downloadScript()">⬇️ Download .ps1</button>
+          <button class="btn btn-sec" onclick="goTab('tab8')">↩️ Undo (Recovery Mode)</button>
+          <button class="btn btn-sec" onclick="copyCode()">📋 Copy</button>
+        </div>
+        <p class="small muted" style="margin-top:0;">Before anything runs, the toolkit saves a recovery snapshot on the USB, so you can undo it from the Recovery Mode tab.</p>
+        <pre id="codePreview"></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 6: MOBILE -->
+  <section id="tab6" class="tab-panel">
+    <div class="card">
+      <h2><span class="h-left">📱 USB Phone & Tablet Scanner (no jailbreak, no root) <button class="info-btn" onclick="showInfo('mobile')">i</button></span>
+        <button class="btn btn-primary" onclick="scanMobile()">🔍 Scan Connected Device</button></h2>
+      <div id="mobileStatusBox" class="muted" style="font-size:.9rem;">Plug in your iPad or iPhone (unlock it and tap <b>Trust This Computer</b>) or an Android phone (with USB debugging on), then click <b>Scan Connected Device</b>.</div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="card" id="appleCard">
+          <h2>🍎 iPad & iPhone</h2>
+          <div id="appleBox" class="muted small">No scan yet.</div>
+        </div>
+        <div class="card">
+          <h2>🤖 Android Apps over USB (no root needed)</h2>
+          <div class="table-wrap"><table id="androidTable"><thead><tr><th>App package</th><th>Action</th></tr></thead><tbody><tr><td colspan="2" class="muted">No Android device scanned yet.</td></tr></tbody></table></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>🛡️ iPad & iPhone Security Checklist</h2>
+        <div class="finding LOW"><b>Passcode + Face ID / Touch ID:</b> <span class="muted">Settings > Face ID & Passcode. Use 6 digits or more. This is also what encrypts the device.</span></div>
+        <div class="finding LOW"><b>Stolen Device Protection:</b> <span class="muted">Settings > Face ID & Passcode > turn ON. Stops a thief who saw your passcode from changing your Apple Account.</span></div>
+        <div class="finding LOW"><b>Find My iPad / iPhone:</b> <span class="muted">Settings > [your name] > Find My > ON, plus "Send Last Location".</span></div>
+        <div class="finding LOW"><b>Automatic updates:</b> <span class="muted">Settings > General > Software Update > Automatic Updates > turn on Security Responses and iPadOS/iOS updates.</span></div>
+        <div class="finding LOW"><b>App tracking & Safari privacy:</b> <span class="muted">Settings > Privacy & Security > Tracking > turn OFF "Allow Apps to Request to Track". In Safari turn on "Hide IP Address".</span></div>
+        <div class="finding LOW"><b>Lockdown Mode (optional):</b> <span class="muted">Settings > Privacy & Security > Lockdown Mode. Extreme protection for travel or if you think you're being targeted.</span></div>
+        <div class="finding LOW"><b>Android: Private DNS:</b> <span class="muted">Settings > Network > Private DNS > <code>dns.quad9.net</code> blocks malware and phishing sites.</span></div>
+        <div class="finding LOW"><b>Android: turn USB debugging OFF</b> <span class="muted">in Developer Options when you are done scanning.</span></div>
+        <p class="small muted">Kids' iPad? See the Screen Time steps in the 👨‍👩‍👧 Family Plan tab.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 7: FAMILY PLAN -->
+  <section id="tab7" class="tab-panel">
+    <div id="familyRoot"><div class="card"><p class="muted">Loading the Family Plan...</p></div></div>
+  </section>
+
+  <!-- TAB 8: RECOVERY MODE -->
+  <section id="tab8" class="tab-panel">
+    <div class="card">
+      <h2><span class="h-left">↩️ Undo Toolkit Changes (Snapshots) <button class="info-btn" onclick="showInfo('snapshots')">i</button></span>
+        <span class="row"><input type="text" id="snapLabel" placeholder="Name (optional)" style="width:170px;"><button class="btn btn-primary btn-sm" onclick="takeSnapshot()">📸 Take Snapshot Now</button><button class="btn btn-sec btn-sm" onclick="openThing('backups')">📂 Open Folder</button></span></h2>
+      <p class="small muted" style="margin-top:0;">Every time the toolkit changes something, it first saves a snapshot of this PC's settings on the USB. Pick one to put everything back exactly how it was then.</p>
+      <div id="snapList" class="muted small">Loading...</div>
+      <pre id="previewBox" style="display:none; margin-top:12px;"></pre>
+    </div>
+
+    <div class="card">
+      <h2><span class="h-left">🧰 Windows Repair Tools <button class="info-btn" onclick="showInfo('repair')">i</button></span></h2>
+      <div class="tool-grid">
+        <div class="tool"><b>Undo EVERYTHING the toolkit did</b><span>Puts every setting this toolkit can change back to Windows defaults. Works even with no snapshot.</span><button class="btn btn-amber btn-sm" onclick="recoveryAction('Defaults', 'Undo every toolkit change on this PC and go back to Windows defaults?')">Back to Windows defaults</button></div>
+        <div class="tool"><b>Windows System Restore point</b><span>A full Windows snapshot of system files and drivers.</span><div class="row"><button class="btn btn-primary btn-sm" onclick="recoveryAction('RestorePoint')">Create one</button><button class="btn btn-sec btn-sm" onclick="recoveryAction('SystemRestore')">Roll back...</button></div></div>
+        <div class="tool"><b>Repair Windows files</b><span>DISM + System File Checker fix corrupted Windows files. Takes 10 to 30 minutes.</span><button class="btn btn-primary btn-sm" onclick="recoveryAction('Repair', 'Start repairing Windows system files? This can take up to 30 minutes.')">Repair Windows</button></div>
+        <div class="tool"><b>Fix the internet</b><span>Resets Winsock, TCP/IP and DNS cache. Fixes most "connected but no internet" problems. Needs a restart.</span><button class="btn btn-primary btn-sm" onclick="recoveryAction('NetReset', 'Reset the network settings? You will need to restart afterwards.')">Reset network</button></div>
+        <div class="tool"><b>Reset the hosts file</b><span>Removes every website redirect or block (malware loves to hijack this file). A copy is saved first.</span><button class="btn btn-sec btn-sm" onclick="recoveryAction('HostsReset', 'Reset the hosts file to the Windows default? This also removes Family Plan website blocks.')">Reset hosts file</button></div>
+        <div class="tool"><b>🚨 Panic button</b><span>Think you have malware or someone is remoting in? Cut the internet instantly, then run HitmanPro.</span><div class="row"><button class="btn btn-red btn-sm" onclick="recoveryAction('NetOff', 'Turn OFF every network adapter now?')">Cut internet</button><button class="btn btn-green btn-sm" onclick="recoveryAction('NetOn')">Restore internet</button></div></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h2><span class="h-left">🔁 Boot Recovery <button class="info-btn" onclick="showInfo('boot')">i</button></span></h2>
+        <div class="tool-grid">
+          <div class="tool"><b>Windows Recovery Environment</b><span>Restarts into the blue Advanced Startup menu (Startup Repair, System Restore, Uninstall Updates, Reset this PC).</span><button class="btn btn-amber btn-sm" onclick="recoveryAction('WinRE', 'Restart into Windows Recovery in 10 seconds? Save your work first.')">Restart into Recovery</button></div>
+          <div class="tool"><b>Safe Mode</b><span>Starts Windows with only the basics, so malware can't load. Good for running HitmanPro.</span><div class="row"><button class="btn btn-amber btn-sm" onclick="recoveryAction('SafeOn', 'Boot into Safe Mode with Networking on the next restart?')">Safe Mode next restart</button><button class="btn btn-sec btn-sm" onclick="recoveryAction('SafeOff')">Back to normal</button></div></div>
+        </div>
+        <div class="modal-box"><b>If the dashboard won't open at all:</b> double-click <code>RECOVERY MODE Windows.bat</code> on the USB. It has every tool on this page in a simple numbered menu and works even in Safe Mode.</div>
+        <div class="modal-box"><b>If Windows won't start:</b> turn the PC on and off 3 times during the Windows logo and it opens Recovery by itself. Or hold <b>Shift</b> while clicking Restart. Then pick Troubleshoot > Advanced options > System Restore.</div>
+      </div>
+      <div class="card">
+        <h2>🍎 iPad & iPhone Recovery</h2>
+        <div class="finding LOW"><b>Back up first:</b> <span class="muted">Plug it in and use "Back up to this USB" on the 📱 tab (full mode), or the Apple Devices app on Windows.</span></div>
+        <div class="finding LOW"><b>Stuck on the Apple logo or keeps restarting? Use Recovery Mode:</b>
+          <ol class="steps muted">
+            <li>Connect it to this PC with a cable and open the <b>Apple Devices</b> app. <button class="btn btn-sec btn-sm" onclick="openThing('apple-devices')">Get Apple Devices</button></li>
+            <li><b>iPad with no Home button:</b> press and release Volume Up (the one nearest the top button), press and release Volume Down, then hold the Top button until the computer-and-cable screen appears.</li>
+            <li><b>iPad with a Home button:</b> hold the Home button and the Top button together until the recovery screen appears.</li>
+            <li><b>iPhone 8 or newer:</b> press Volume Up, press Volume Down, then hold the Side button.</li>
+            <li>In Apple Devices choose <b>Update</b> first. That reinstalls iPadOS/iOS <i>without erasing</i> your data. Only choose Restore if Update fails.</li>
+          </ol>
+        </div>
+        <div class="finding LOW"><b>Forgot the passcode?</b> <span class="muted">Recovery Mode + Restore erases the device. Then sign in with your Apple Account and restore your backup.</span></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+  <!-- TAB 9: REPORTS & LOGS -->
+  <section id="tab9" class="tab-panel">
+    <div class="card">
+      <h2><span class="h-left">🛡️ What This PC Is Protected From <button class="info-btn" onclick="showInfo('protReport')">i</button></span>
+        <span class="row"><button class="btn btn-primary btn-sm" onclick="saveReport()">📄 Save Full Report</button><button class="btn btn-sec btn-sm" onclick="openThing('reports')">📂 Open Reports</button></span></h2>
+      <div id="protSummary" class="muted">Run a scan first (🔍 Rescan PC at the top).</div>
+    </div>
+    <div class="card">
+      <h2><span class="h-left">📜 Activity Log <button class="info-btn" onclick="showInfo('logs')">i</button></span>
+        <span class="row"><select id="logPick" onchange="readLog(this.value)" style="max-width:320px;"></select><button class="btn btn-sec btn-sm" onclick="loadLogs()">🔄 Refresh</button><button class="btn btn-sec btn-sm" onclick="copyLog()">📋 Copy</button><button class="btn btn-sec btn-sm" onclick="openThing('logs')">📂 Open Logs</button></span></h2>
+      <p class="small muted" style="margin-top:0;">Everything the toolkit does is written here: scans, every button you click, scripts it ran (with their full output), Recovery Mode, and any errors. If something goes wrong, this is the first place to look, and you can copy it when asking for help.</p>
+      <pre id="logBox">No log loaded yet.</pre>
+    </div>
+  </section>
+
+<!-- INFO MODAL -->
+<div class="modal-backdrop" id="infoModal" onclick="if(event.target===this) closeInfo()">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head"><h3 id="modalTitle">Information</h3><button class="btn btn-sec btn-sm" onclick="closeInfo()">✕ Close</button></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================================
+// Basics
+// ============================================================================
+const TOKEN = (document.querySelector('meta[name="toolkit-token"]') || {}).content || '';
+const isLocalServer = location.protocol.startsWith('http') && !TOKEN.startsWith('%%');
+let lastScan = null;
+let platform = 'Windows';
+
+function esc(v) { return String(v ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+function pretty(v) { return String(v ?? '').replace(/_/g, ' ').replace(/\s{2,}/g, ' ').trim(); }
+function $(id) { return document.getElementById(id); }
+
+async function api(path, body) {
+  const opts = { method: body === undefined ? 'GET' : 'POST', headers: { 'X-Toolkit-Token': TOKEN } };
+  if (body !== undefined) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+  const r = await fetch(path, opts);
+  let j = {};
+  try { j = await r.json(); } catch (e) {}
+  if (!r.ok && !j.message) j.message = 'Server error ' + r.status;
+  return j;
+}
+
+let toastTimer;
+function showToast(msg, bad) {
+  const t = $('toast'); t.textContent = msg; t.style.display = 'inline'; t.style.color = bad ? 'var(--bad-text)' : 'var(--ok-text)';
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.style.display = 'none'; }, 6000);
+}
+function needServer() { showToast('Double-click "START HERE Windows.bat" first so the toolkit can do this.', true); return false; }
+async function runAction(path, body) {
+  if (!isLocalServer) return needServer();
+  const j = await api(path, body);
+  showToast(j.message || (j.ok ? 'Done.' : 'Something went wrong.'), !j.ok);
+  return j;
+}
+function openThing(what) { return runAction('/api/open', { what }); }
+
+// ============================================================================
+// Tabs
+// ============================================================================
+document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => goTab(b.dataset.tab)));
+function goTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === id));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+  try { sessionStorage.setItem('toolkit-tab', id); } catch (e) {}
+  if (id === 'tab7') loadFamily();
+  if (id === 'tab8') loadSnapshots();
+  if (id === 'tab9') { renderProtection(); loadLogs(); }
+}
+
+// Send browser-side errors to the activity log so problems can be traced later.
+function logToServer(message) { if (isLocalServer) api('/api/client-log', { message }).catch(() => {}); }
+window.addEventListener('error', e => logToServer(`Page error: ${e.message} (line ${e.lineno})`));
+window.addEventListener('unhandledrejection', e => logToServer(`Page error: ${e.reason && e.reason.message ? e.reason.message : e.reason}`));
+
+// ============================================================================
+// Themes
+// ============================================================================
+const THEMES = [
+  { id: 'midnight', name: 'Classic Midnight', desc: 'The original look', sw: ['#0b1120', '#162033', '#38bdf8', '#22c55e'] },
+  { id: 'hacker', name: 'Hacker Terminal', desc: 'Green-on-black + code rain', sw: ['#000', '#020a03', '#00ff41', '#86ffa6'] },
+  { id: 'cyberpunk', name: 'Cyberpunk Neon', desc: 'Hot pink and cyan', sw: ['#0d0221', '#1a0b3a', '#ff2a6d', '#05d9e8'] },
+  { id: 'amber', name: 'Retro Amber', desc: '1980s amber monitor', sw: ['#140c02', '#1e1306', '#ffb000', '#ffcc66'] },
+  { id: 'ocean', name: 'Deep Ocean', desc: 'Calm teal and blue', sw: ['#03141f', '#06283a', '#2dd4bf', '#34d399'] },
+  { id: 'light', name: 'Daylight', desc: 'Bright and clean', sw: ['#f4f6fb', '#ffffff', '#0369a1', '#15803d'] },
+  { id: 'contrast', name: 'High Contrast', desc: 'Easiest to read', sw: ['#000', '#000', '#ffff00', '#ffffff'] },
+];
+function openThemes() {
+  const cur = document.documentElement.dataset.theme;
+  $('modalTitle').textContent = '🎨 Pick a Theme';
+  $('modalBody').innerHTML = `<div class="theme-grid">${THEMES.map(t => `
+    <button class="theme-card ${t.id === cur ? 'active' : ''}" onclick="setTheme('${t.id}')">
+      <div class="theme-swatch" style="background:${t.sw[0]}">${t.sw.slice(1).map(c => `<i style="background:${c}"></i>`).join('')}</div>
+      <div class="theme-name">${esc(t.name)}<small>${esc(t.desc)}</small></div>
+    </button>`).join('')}</div>
+    <p class="small muted">Your pick is saved on the USB, so it follows you to every PC.</p>`;
+  $('infoModal').classList.add('open');
+}
+function setTheme(id, quiet) {
+  if (!THEMES.find(t => t.id === id)) id = 'midnight';
+  document.documentElement.dataset.theme = id;
+  try { localStorage.setItem('toolkit-theme', id); } catch (e) {}
+  if (!quiet) {
+    if (isLocalServer) api('/api/settings', { theme: id });
+    document.querySelectorAll('.theme-card').forEach(c => c.classList.toggle('active', c.getAttribute('onclick').includes(`'${id}'`)));
+  }
+  rain(id === 'hacker');
+}
+// Code rain for the hacker theme (paused when the tab is hidden or motion is reduced)
+let rainTimer = null;
+function rain(on) {
+  const c = $('rain'); if (!c) return;
+  clearInterval(rainTimer); rainTimer = null;
+  if (!on || matchMedia('(prefers-reduced-motion: reduce)').matches) { c.getContext('2d').clearRect(0, 0, c.width, c.height); return; }
+  const ctx = c.getContext('2d'); const size = 16; let drops = [];
+  const resize = () => { c.width = innerWidth; c.height = innerHeight; drops = Array(Math.ceil(c.width / size)).fill(0).map(() => Math.random() * -50); };
+  resize(); window.onresize = resize;
+  const chars = '01ABCDEF<>/{}#$%=+*アイウエオカキクケコ';
+  rainTimer = setInterval(() => {
+    if (document.hidden) return;
+    ctx.fillStyle = 'rgba(0,0,0,0.08)'; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.fillStyle = '#00ff41'; ctx.font = size + 'px monospace';
+    drops.forEach((y, i) => {
+      ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * size, y * size);
+      drops[i] = (y * size > c.height && Math.random() > 0.975) ? 0 : y + 1;
+    });
+  }, 60);
+}
+
+// ============================================================================
+// Info modal
+// ============================================================================
+const INFO_DB = {
+  score: { title: 'System Health & Security Score (0 to 100)', what: 'A quick overall grade of how protected, clean and fast this computer is right now.', why: 'It checks disk space, Defender, the firewall, UAC, disk encryption, Windows updates, the Wi-Fi you are on, Wi-Fi spoofing protections, open ports, backdoors and privacy settings. Above 85 is strong; below 60 means important protections are missing.', safe: '100% read-only.' },
+  findings: { title: 'Detected Issues & Recommendations', what: 'A prioritized list of anything slowing down or exposing this computer.', why: 'Critical/High items are real risks (for example the firewall being off or an open Wi-Fi network). Medium/Low items are privacy or performance improvements.', safe: 'Review each item before changing anything in the Script Builder.' },
+  advisor: { title: 'Offline Advisor', what: 'An instant Q&A helper that reads the live scan and answers in plain English.', why: 'Works 100% offline. If Ollama is running locally on port 11434, it automatically uses your local AI model too.', safe: 'Never sends your data to the cloud.' },
+  caches: { title: 'Safe Caches & Upgrade Leftovers', what: 'Temporary files, developer package caches and old Windows upgrade folders.', why: 'Clearing them frees gigabytes. If a tool needs a cached package again it just downloads it again. Windows.old and C:\\ESD must be removed with Disk Cleanup (Clean up system files).', safe: 'Never deletes documents, photos or projects.' },
+  downloads: { title: 'Largest Items in Downloads', what: 'Big installers, ISO images or archives in your Downloads folder.', why: 'People often forget 5 to 20 GB of installers in Downloads.', safe: 'Read-only list. Nothing is deleted.' },
+  ports: { title: 'Listening Ports', what: 'Programs waiting for connections from your Wi-Fi or Ethernet network.', why: 'Normal Windows ports (135, 445, 49664+) are protected by the firewall. Unexpected ones like 3306 (MySQL), 8090, 623 (Intel AMT) or 3389 (Remote Desktop) are targets on public Wi-Fi.', safe: '"Block Public" adds a firewall rule only for public networks, and can be undone in Recovery Mode.' },
+  outbound: { title: 'Programs Talking to the Internet', what: 'Programs on this computer actively connected to the internet right now.', why: 'Helps you spot unknown programs phoning home.', safe: 'Browsers, OneDrive, Teams, Discord and svchost are normal.' },
+  startup: { title: 'Startup Apps', what: 'Programs that start automatically when you sign in.', why: 'Too many slow down start-up and use RAM in the background.', safe: 'Disabling just means the app waits until you open it. A snapshot is saved first so you can undo it.' },
+  backdoors: { title: 'Backdoor Checks & Risky Extensions', what: 'Checks the Sticky Keys / Utilman login-screen trick and IFEO debugger hijacks, plus known tracking or adware browser extensions.', why: 'If Sticky Keys or IFEO is tampered with, someone can bypass the login screen. Coupon extensions track your browsing.', safe: '"Valid" and "0 found" mean clean.' },
+  matrix: { title: 'Security & Privacy Control Matrix', what: 'Live status of the key security and privacy settings.', why: 'PROTECTED means it is on or locked down; EXPOSED means Windows is using a less safe default.', safe: 'Fix red items in the Script Builder.' },
+  restorePoint: { title: 'System Restore Point', what: 'A Windows snapshot of system files and the registry taken right before changes.', why: 'Windows System Restore can roll the whole PC back to this moment. The toolkit also saves its own snapshot on the USB that you can restore from the Recovery Mode tab.', safe: 'Always recommended.' },
+  ssdTrim: { title: 'SSD ReTrim', what: 'Tells your SSD which deleted blocks are free.', why: 'Keeps SSD write speed up after freeing space.', safe: 'Standard Windows maintenance.' },
+  oneDrive: { title: 'OneDrive Cloud-Only', what: 'Keeps OneDrive files in the cloud until you open them.', why: 'Can free 20 to 70 GB with zero file deletion.', safe: 'Needs internet to open a cloud-only file.' },
+  asr: { title: 'Defender Attack Surface Reduction (Audit Mode)', what: '12 Microsoft rules that watch for malicious Office macros, scripts and password stealing.', why: 'In Audit Mode Defender only logs, never blocks, so it will not break games or tools.', safe: 'Non-destructive.' },
+  ctrl_defender: { title: 'Defender Real-Time, PUA & Network Protection', what: 'Windows antivirus, adware blocker and malicious website blocker.', why: 'Network Protection blocks bad sites in every app, not just Edge.', safe: 'No impact on normal apps.' },
+  ctrl_firewall: { title: 'Windows Firewall', what: 'Blocks unwanted incoming connections.', why: 'With it off, every listening port is open to anyone on the same Wi-Fi.', safe: 'Always keep it on.' },
+  ctrl_uac: { title: 'User Account Control (UAC)', what: 'The "Do you want to allow this app to make changes?" prompt.', why: 'With UAC off, any program (including malware) silently gets full admin rights.', safe: 'Always keep it on.' },
+  ctrl_bitlocker: { title: 'Disk Encryption (BitLocker / Device Encryption)', what: 'Scrambles everything on drive C: until you sign in.', why: 'If the laptop is stolen, nobody can read your files by pulling the drive. Keep your recovery key in your Microsoft account.', safe: 'Safe; turn on from Settings > Privacy & security > Device encryption.' },
+  ctrl_secureboot: { title: 'Secure Boot', what: 'A UEFI/BIOS feature that only lets trusted software start the PC.', why: 'Blocks rootkits and boot-level malware.', safe: 'Turned on in the PC firmware settings.' },
+  ctrl_llmnr: { title: 'LLMNR, NetBIOS, WPAD & NTLMv1', what: 'Old local-network name lookups and weak password hashes.', why: 'On public Wi-Fi, tools like Responder abuse these to steal your Windows password hash.', safe: 'Safe to disable on home, school, travel and gaming PCs.' },
+  ctrl_usb: { title: 'USB AutoRun & AutoPlay', what: 'Stops Windows from running things automatically when a USB drive is plugged in.', why: 'Protects against infected flash drives.', safe: 'Drives still open normally when you click them.' },
+  ctrl_remote: { title: 'Remote Assistance, RDP, WinRM & Intel LMS', what: 'Remote control and management services.', why: 'Unless IT remotes into your PC, leaving these on just adds attack surface. Tech-support scammers love Remote Assistance.', safe: 'Leave unchecked on a work PC if IT uses Remote Desktop.' },
+  ctrl_recall: { title: 'Windows Recall', what: 'A Windows 11 feature that screenshots your screen and makes it searchable.', why: 'Stops screenshots of banking, passwords and messages being stored.', safe: 'Safe to disable.' },
+  ctrl_typing: { title: 'Typing & Inking Harvesting', what: 'Windows learning from what you type and write.', why: 'Stops Windows collecting your typing to build dictionaries.', safe: 'Safe to disable.' },
+  ctrl_bing: { title: 'Start Menu Bing Search', what: 'Stops the Start menu sending what you type to Bing.', why: 'Faster, private, local search.', safe: 'Safe.' },
+  ctrl_clip: { title: 'Cloud Clipboard & Ad ID', what: 'Clipboard history/sync and your Windows advertising ID.', why: 'Copied passwords won\'t linger in clipboard history or sync to the cloud.', safe: 'Safe.' },
+  ctrl_dosvc: { title: 'Windows Update P2P Sharing', what: 'Stops Windows uploading update pieces to strangers.', why: 'Saves bandwidth and closes port 7680.', safe: 'Updates keep working.' },
+  mobile: { title: 'USB Phone & Tablet Scanner', what: 'Inspects an iPad, iPhone or Android over a USB cable. No jailbreak or root.', why: 'Basic mode just sees that the iPad is plugged in. Full mode (with the free Apple Devices app plus the libimobiledevice tools in Tools\\libimobiledevice) reads the iPadOS version, passcode status, storage, battery, backup encryption and installed apps, and can back the device up to this USB.', safe: 'Read-only, except the buttons you click. Bluetooth-only connections are not counted as plugged in.' },
+  snapshots: { title: 'Recovery Snapshots', what: 'A saved copy of every setting this toolkit can change: registry policies, services, firewall rules it added, DNS, NetBIOS, the hosts file, Defender settings, startup apps, account sign-in hours, admin rights and Family Plan tasks.', why: 'Restoring one puts all of those back exactly. Before a restore, the current state is saved too, so a restore can itself be undone. Snapshots are kept per PC, so you can carry the USB between computers safely.', safe: 'Use "Preview" to see exactly what would change before restoring.' },
+  repair: { title: 'Windows Repair Tools', what: 'Built-in Microsoft repair commands.', why: 'They fix the most common problems: corrupted system files, broken networking and hijacked hosts files.', safe: 'Each one asks for Windows permission and shows its progress in a window.' },
+  boot: { title: 'Boot Recovery', what: 'Ways to start Windows in a repair mode.', why: 'The Recovery Environment can undo bad updates, run Startup Repair or System Restore. Safe Mode starts Windows with almost nothing loaded so malware can\'t fight back.', safe: 'Remember to switch Safe Mode back off.' },
+  sac: { title: 'Smart App Control is blocking the iPad tools', what: 'Smart App Control is a Windows 11 protection that only lets programs run if they are code-signed or well known to Microsoft. The free iPad tools (libimobiledevice) are open source and not code-signed, so Windows blocks them on this PC.', why: 'It is protecting you from unknown programs, which is a good thing. Turning Smart App Control off is permanent on Windows 11: you can only turn it back on by reinstalling Windows. That is why the toolkit does not turn it off.', safe: 'Recommended: leave it on. The full iPad scan works on PCs without Smart App Control. Basic USB detection, the checklist and Recovery Mode steps work everywhere.' },
+  protReport: { title: 'Protection Report', what: 'A plain-English list of the threats this computer is already protected from, and the ones it is not protected from yet, based on the latest scan.', why: 'So you can see at a glance what is covered, show someone else, or compare before and after changes.', safe: '"Save Full Report" keeps a copy in the Reports folder on the USB, with the issues, protections, ports, startup apps and recent toolkit activity.' },
+  logs: { title: 'Activity Log', what: 'A diary of everything the toolkit does on this PC, saved in Logs\\<PC name> on the USB. "toolkit" logs list each action; "run" and "recovery" logs hold the complete output of each script that changed something.', why: 'If something stops working after a change, the log shows exactly what was changed and when, and any errors. Undo it from Recovery Mode.', safe: 'Logs stay on your USB. Logs older than 30 days are deleted automatically. They contain this PC\'s name and settings, so don\'t post them publicly.' },
+  family: { title: 'Family Plan', what: 'Parental controls for this PC: website blocking for every app, SafeSearch, a family-safe DNS filter, search-word blocking, private browsing off, and allowed sign-in hours for each child.', why: 'It uses Windows\' own rules, so it keeps working after you unplug the USB. Kids must use a Standard (not admin) account, otherwise they could undo it.', safe: 'Turn it off in one click here or from RECOVERY MODE Windows.bat. A snapshot is saved before every change.' },
+  familyPin: { title: 'Parent PIN', what: 'A PIN that locks the Family Plan screen of this toolkit.', why: 'Stops kids from changing settings in the toolkit. The real lock is that kids use Standard accounts: Windows asks for an admin password before anything can be changed.', safe: 'The PIN is stored scrambled (PBKDF2) on the USB in Config. Forgot it? Delete "Config\\family settings.json" on the USB and set the plan up again. Keep the USB somewhere safe.' },
+};
+function showInfo(key) {
+  const item = INFO_DB[key] || { title: 'Info', what: 'Information about this setting.', why: '', safe: '' };
+  $('modalTitle').textContent = item.title;
+  $('modalBody').innerHTML = `<p><strong>What it is:</strong> ${esc(item.what)}</p>
+    <div class="modal-box"><strong>Why it matters:</strong> ${esc(item.why)}</div>
+    <div class="modal-box"><strong>Safety / impact:</strong> ${esc(item.safe)}</div>`;
+  $('infoModal').classList.add('open');
+}
+function closeInfo() { $('infoModal').classList.remove('open'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInfo(); });
+
+// ============================================================================
+// Start-up
+// ============================================================================
+(async function init() {
+  if (isLocalServer) {
+    $('serverStatus').textContent = 'Connected to the toolkit server (127.0.0.1:8765). Live scanning and controls are on.';
+    $('stopBtn').style.display = 'inline-flex';
+    try {
+      const s = await api('/api/settings');
+      platform = s.platform || 'Windows';
+      if (s.theme) setTheme(s.theme, true);
+    } catch (e) {}
+    setTimeout(runLiveScan, 150);
+  } else {
+    $('serverStatus').textContent = 'Offline file mode. Double-click "START HERE Windows.bat" for live scanning.';
+    $('staticBanner').style.display = 'block';
+    $('runLiveBtn').style.display = 'none';
+  }
+  setTheme(document.documentElement.dataset.theme || 'midnight', true);
+  try { const t = sessionStorage.getItem('toolkit-tab'); if (t && $(t)) goTab(t); } catch (e) {}
+  generate();
+})();
+
+// ============================================================================
+// Scan
+// ============================================================================
+const CONTROL_LABELS = {
+  Windows: [
+    ['Defender Real-Time', 'defenderRealTime', 'ctrl_defender'], ['Defender Network Protection', 'defenderNetProt', 'ctrl_defender'],
+    ['Windows Firewall (all profiles)', 'firewallOn', 'ctrl_firewall'], ['User Account Control', 'uacOn', 'ctrl_uac'],
+    ['Disk Encryption (BitLocker)', 'bitlockerOn', 'ctrl_bitlocker'], ['Secure Boot', 'secureBootOn', 'ctrl_secureboot'],
+    ['LLMNR Poisoning Blocked', 'llmnrOff', 'ctrl_llmnr'], ['Wi-Fi NetBIOS (139) Blocked', 'wifiNetbiosOff', 'ctrl_llmnr'],
+    ['NTLMv2-Only Sign-in', 'ntlmv2Only', 'ctrl_llmnr'], ['USB AutoRun Blocked', 'usbAutorunOff', 'ctrl_usb'],
+    ['Remote Assistance Off', 'remoteAssistOff', 'ctrl_remote'], ['Windows Recall Blocked', 'recallBlocked', 'ctrl_recall'],
+    ['Typing Harvesting Blocked', 'typingBlocked', 'ctrl_typing'], ['Bing Start Menu Search Off', 'bingSearchOff', 'ctrl_bing'],
+    ['Cloud Clipboard Off', 'clipboardOff', 'ctrl_clip'], ['Windows Ad ID Off', 'adIdOff', 'ctrl_clip'],
+    ['Update P2P Sharing Off', 'doSvcHttpOnly', 'ctrl_dosvc'],
+  ],
+  macOS: [
+    ['Gatekeeper (blocks unsigned apps)', 'gatekeeper', 'ctrl_defender'], ['Application Firewall', 'firewall', 'ctrl_firewall'],
+    ['Firewall Stealth Mode', 'stealth', 'ctrl_firewall'], ['FileVault Disk Encryption', 'filevault', 'ctrl_bitlocker'],
+    ['System Integrity Protection', 'sip', 'ctrl_secureboot'],
+  ],
+  Linux: [
+    ['Firewall (ufw / firewalld)', 'firewall', 'ctrl_firewall'], ['Disk Encryption (LUKS)', 'encryption', 'ctrl_bitlocker'],
+    ['Secure Boot', 'secureBoot', 'ctrl_secureboot'], ['SSH Server Off', 'sshOff', 'ctrl_remote'],
+    ['Automatic Security Updates', 'autoUpdates', 'ctrl_dosvc'],
+  ],
+};
+
+// What each protection defends against, for the protection report.
+const PROTECTS = {
+  defenderRealTime: 'Viruses, ransomware and spyware running on this PC',
+  defenderNetProt: 'Phishing and malware websites, in every app',
+  firewallOn: 'Strangers on the same network connecting into this PC',
+  uacOn: 'Programs silently taking full admin control',
+  bitlockerOn: 'Someone reading your files from a lost or stolen laptop',
+  secureBootOn: 'Rootkits that load before Windows starts',
+  llmnrOff: 'Password-hash theft on public Wi-Fi (LLMNR poisoning)',
+  wifiNetbiosOff: 'NetBIOS spoofing and snooping on public Wi-Fi',
+  ntlmv2Only: 'Weak, easily cracked Windows sign-in hashes',
+  usbAutorunOff: 'Infected USB drives running by themselves',
+  remoteAssistOff: 'Tech-support scammers remoting into this PC',
+  recallBlocked: 'Screenshots of passwords and messages being saved by Recall',
+  typingBlocked: 'Windows collecting what you type',
+  bingSearchOff: 'Start menu searches being sent to Bing',
+  clipboardOff: 'Copied passwords syncing to the cloud',
+  adIdOff: 'Advertising tracking across apps',
+  doSvcHttpOnly: 'Uploading update data to strangers (port 7680)',
+  gatekeeper: 'Unsigned and unknown apps running', firewall: 'Strangers on the same network connecting into this computer',
+  stealth: 'Being discovered by network scans', filevault: 'Someone reading your files from a lost or stolen Mac',
+  sip: 'Malware changing protected system files', encryption: 'Someone reading your files from a lost or stolen laptop',
+  secureBoot: 'Rootkits that load before the system starts', sshOff: 'Remote login attempts over SSH',
+  autoUpdates: 'Known security holes staying unpatched',
+};
+
+function protectionLists(d) {
+  const labels = CONTROL_LABELS[d.platform || platform] || CONTROL_LABELS.Windows;
+  const yes = [], no = [];
+  for (const [lbl, key] of labels) (d.controls && d.controls[key] ? yes : no).push({ lbl, threat: PROTECTS[key] || lbl });
+  if (d.platform === 'Windows' || !d.platform) {
+    (d.stickyKeysClean && !(d.ifeoHijacks || []).length ? yes : no).push({ lbl: 'Login-screen backdoor check', threat: 'Sticky Keys / IFEO tricks that bypass the Windows login' });
+    if (d.patchDays != null) (d.patchDays <= 45 ? yes : no).push({ lbl: `Windows updates (${d.patchDays} days ago)`, threat: 'Known security holes that updates already fixed' });
+    if (d.wifi && d.wifi.connected) (d.wifi.auth !== 'Open' ? yes : no).push({ lbl: `Wi-Fi encryption (${d.wifi.auth})`, threat: 'People nearby reading your Wi-Fi traffic' });
+  }
+  ((d.riskyExts || []).length ? no : yes).push({ lbl: 'Browser extensions', threat: 'Coupon and adware extensions tracking your browsing' });
+  return { yes, no };
+}
+
+function renderProtection() {
+  const box = $('protSummary'); if (!box) return;
+  if (!lastScan) { box.innerHTML = '<span class="muted">Run a scan first (🔍 Rescan PC at the top).</span>'; return; }
+  const { yes, no } = protectionLists(lastScan);
+  const li = (x, ok) => `<div class="finding ${ok ? 'OK' : 'HIGH'}"><b>${ok ? '✅' : '⚠️'} ${esc(x.threat)}</b><br><span class="small muted">${esc(x.lbl)}</span></div>`;
+  box.innerHTML = `<p style="margin-top:0;">${esc(lastScan.hostname)} - score <b>${esc(lastScan.score)}/100</b> - protected against <b>${yes.length}</b> of <b>${yes.length + no.length}</b> threats checked.</p>
+    <div class="grid-2"><div><h3 style="color:var(--ok-text)">Protected from</h3>${yes.map(x => li(x, true)).join('') || '<p class="muted">Nothing yet.</p>'}</div>
+    <div><h3 style="color:var(--bad-text)">Not protected from yet</h3>${no.map(x => li(x, false)).join('') || '<p class="muted">Nothing - everything checked is covered!</p>'}
+    ${no.length ? '<p class="small muted">Fix these in ⚙️ Script Builder (pick a profile and click Run), and check 📊 Overview for details.</p>' : ''}</div></div>`;
+}
+
+async function loadLogs() {
+  if (!isLocalServer) { $('logBox').textContent = 'Logs need the toolkit server.'; return; }
+  const j = await api('/api/logs');
+  const files = j.files || [];
+  const pick = $('logPick'); const cur = pick.value;
+  pick.innerHTML = files.map(f => `<option value="${esc(f.name)}">${esc(f.name.replace(/\.log$/, ''))} (${esc(f.sizeKB)} KB)</option>`).join('') || '<option value="">No logs yet</option>';
+  if (cur && files.some(f => f.name === cur)) pick.value = cur;
+  if (pick.value) readLog(pick.value); else $('logBox').textContent = 'No logs yet.';
+}
+async function readLog(file) {
+  if (!file) return;
+  const j = await api('/api/log-read', { file });
+  const box = $('logBox'); box.textContent = j.text || '(empty)'; box.scrollTop = box.scrollHeight;
+}
+function copyLog() { navigator.clipboard.writeText($('logBox').textContent).then(() => showToast('Copied the log.')); }
+
+async function runLiveScan() {
+  if (!isLocalServer) return needServer();
+  showToast('Scanning this PC...');
+  let d;
+  try { d = await api('/api/scan'); } catch (e) { return showToast('Could not reach the toolkit server. Is the black window still open?', true); }
+  if (!d || d.score === undefined) return showToast(d.message || 'Scan failed.', true);
+  lastScan = d; platform = d.platform || platform;
+
+  const color = d.score >= 85 ? 'var(--green)' : (d.score >= 60 ? 'var(--amber)' : 'var(--red)');
+  $('scoreNum').textContent = d.score; $('scoreNum').style.color = color; $('scoreCircle').style.borderColor = color;
+  $('sysIdentity').textContent = `${d.hostname} - User: ${d.user} (${d.os})`;
+  trackScore(d);
+
+  const wifi = d.wifi && d.wifi.connected ? `<span class="stat-pill">📶 Wi-Fi: <b>${esc(d.wifi.ssid)}</b> (${esc(d.wifi.auth)})</span>` : '';
+  $('statsRow').innerHTML = `
+    <span class="stat-pill">💾 Free disk: <b>${esc(d.freeGB)} / ${esc(d.totalGB)} GB</b> (${esc(d.freePct)}%)</span>
+    <span class="stat-pill">🧠 Free RAM: <b>${esc(d.freeRAM)} / ${esc(d.totalRAM)} GB</b></span>
+    <span class="stat-pill">🕒 Last boot: <b>${esc(d.lastBoot)}</b></span>
+    ${d.patchDays != null ? `<span class="stat-pill">🔄 Last update: <b>${esc(d.patchDays)} days ago</b></span>` : ''}
+    ${wifi}
+    <span class="stat-pill">🛡️ HitmanPro: <b>${d.hitmanProAvailable ? 'Ready on USB' : 'Missing'}</b></span>`;
+
+  if (d.ollamaAvailable) { $('aiBadge').textContent = '🟢 Local Ollama AI + offline rules'; $('aiBadge').style.color = 'var(--ok-text)'; }
+
+  const sevOrder = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
+  const findings = (d.findings || []).slice().sort((a, b) => sevOrder[a.severity] - sevOrder[b.severity]);
+  $('findingsList').innerHTML = findings.length
+    ? findings.map(f => `<div class="finding ${esc(f.severity)}"><b>[${esc(f.severity)}] ${esc(f.title)}</b><br><span class="muted">Fix: ${esc(f.fix)}</span></div>`).join('')
+    : `<div class="finding OK"><b>All clear!</b> No major security, privacy or storage issues on ${esc(d.hostname)}.</div>`;
+
+  renderCaches(d.caches || []);
+  $('dlTable').querySelector('tbody').innerHTML = (d.largeDownloads || []).length
+    ? d.largeDownloads.map(f => `<tr><td title="${esc(f.Name)}">${esc(pretty(f.Name))}</td><td>${esc(f.Type)}</td><td><b>${esc(f.SizeGB)}</b></td></tr>`).join('')
+    : `<tr><td colspan="3" class="muted">No files over 100 MB in Downloads.</td></tr>`;
+
+  $('portTable').querySelector('tbody').innerHTML = (d.listeningPorts || []).map(p => `<tr><td class="mono">${esc(p.LocalAddress)}</td><td><b>${esc(p.LocalPort)}</b></td><td>${esc(pretty(p.Process || 'System'))}</td><td>${platform === 'Windows' ? `<button class="btn btn-red btn-sm" data-port="${esc(p.LocalPort)}" onclick="blockPort(this.dataset.port)">🧱 Block Public</button>` : ''}</td></tr>`).join('') || `<tr><td colspan="4" class="muted">No network-reachable ports.</td></tr>`;
+  $('outTable').querySelector('tbody').innerHTML = (d.outboundConns || []).map(o => `<tr><td class="mono">${esc(o.RemoteAddress)}</td><td>${esc(o.RemotePort)}</td><td><b>${esc(pretty(o.Process))}</b></td></tr>`).join('') || `<tr><td colspan="3" class="muted">None right now.</td></tr>`;
+  $('startupCount').textContent = (d.startupItems || []).length;
+  $('startupTable').querySelector('tbody').innerHTML = (d.startupItems || []).map(s => `<tr><td><b>${esc(pretty(s.Name))}</b></td><td class="muted wrap small">${esc(s.Command)}</td><td>${platform === 'Windows' ? `<button class="btn btn-sec btn-sm" data-name="${esc(s.Name)}" onclick="disableStartup(this.dataset.name)">🚫 Disable</button>` : ''}</td></tr>`).join('');
+
+  $('backdoorBox').innerHTML = platform === 'Windows' ? `
+    <div>Sticky Keys / Utilman signatures: <b style="color:${d.stickyKeysClean ? 'var(--ok-text)' : 'var(--bad-text)'}">${d.stickyKeysClean ? 'VALID (clean)' : 'TAMPERED!'}</b></div>
+    <div>IFEO debugger hijacks: <b style="color:${d.ifeoHijacks.length === 0 ? 'var(--ok-text)' : 'var(--bad-text)'}">${d.ifeoHijacks.length === 0 ? '0 found (clean)' : esc(d.ifeoHijacks.join(', '))}</b></div>`
+    : `<div>System Integrity Protection: <b style="color:${d.stickyKeysClean ? 'var(--ok-text)' : 'var(--bad-text)'}">${d.stickyKeysClean ? 'ON' : 'OFF'}</b></div>`;
+  $('extTable').querySelector('tbody').innerHTML = (d.riskyExts || []).length
+    ? d.riskyExts.map(e => `<tr><td>${esc(e.Browser)}</td><td><b>${esc(e.Name)}</b></td><td class="mono">${esc(e.Id)}</td><td class="row"><button class="btn btn-sec btn-sm" data-b="${esc(e.Browser)}" data-n="${esc(e.Name)}" data-i="${esc(e.Id)}" onclick="showExtHelp(this.dataset.b,this.dataset.n,this.dataset.i)">ⓘ How to remove</button>${platform === 'Windows' ? `<button class="btn btn-red btn-sm" data-b="${esc(e.Browser)}" data-i="${esc(e.Id)}" onclick="blockExtension(this.dataset.b,this.dataset.i)">🚫 Block forever</button>` : ''}</td></tr>`).join('')
+    : `<tr><td colspan="4" style="color:var(--ok-text)">No known tracking or bloatware extensions.</td></tr>`;
+
+  const labels = CONTROL_LABELS[platform] || CONTROL_LABELS.Windows;
+  $('controlsGrid').innerHTML = labels.map(([lbl, key, info]) => {
+    const ok = !!(d.controls || {})[key];
+    return `<div class="status-tile"><span class="tile-left">${esc(lbl)} <button class="info-btn" onclick="showInfo('${info}')">i</button></span><span class="badge ${ok ? 'badge-on' : 'badge-off'}">${ok ? 'PROTECTED' : 'EXPOSED'}</span></div>`;
+  }).join('');
+
+  renderProtection();
+  showToast(`Scan complete! Score: ${d.score}/100`);
+  if (platform === 'Windows') loadCacheSizes();
+}
+
+function trackScore(d) {
+  try {
+    const key = 'toolkit-scores-' + d.hostname;
+    const hist = JSON.parse(localStorage.getItem(key) || '[]');
+    const prev = hist.length ? hist[hist.length - 1] : null;
+    if (prev) {
+      const diff = d.score - prev.s;
+      $('scoreTrend').textContent = `Last time: ${prev.s} (${new Date(prev.t).toLocaleDateString()}) ${diff > 0 ? '▲ +' + diff : diff < 0 ? '▼ ' + diff : '='}`;
+    }
+    if (!prev || Date.now() - prev.t > 60000 || prev.s !== d.score) { hist.push({ t: Date.now(), s: d.score }); localStorage.setItem(key, JSON.stringify(hist.slice(-20))); }
+  } catch (e) {}
+}
+
+function renderCaches(caches, sizes) {
+  $('cacheTable').querySelector('tbody').innerHTML = caches.length
+    ? caches.map(c => {
+        const sz = sizes && sizes[c.Key] != null ? `<b>${esc(sizes[c.Key])} GB</b>` : (sizes ? '<span class="muted">0 GB</span>' : (c.SizeGB != null && c.SizeGB !== 'Present' ? `<b>${esc(c.SizeGB)}</b>` : '<span class="muted">measuring...</span>'));
+        return `<tr><td>${esc(c.Name)}</td><td>${sz}</td><td class="small muted">${c.Cleanable === false ? 'Disk Cleanup > Clean up system files' : 'Clean Safe Caches button'}</td></tr>`;
+      }).join('')
+    : `<tr><td colspan="3" class="muted">All safe caches are clean!</td></tr>`;
+}
+async function loadCacheSizes() {
+  try {
+    const j = await api('/api/cache-sizes');
+    if (lastScan) { lastScan.cacheSizes = j.sizes || {}; renderCaches(lastScan.caches || [], lastScan.cacheSizes); }
+  } catch (e) {}
+}
+
+// ============================================================================
+// Advisor
+// ============================================================================
+function askPreset(q) { $('chatInput').value = q; sendChat(); }
+async function sendChat() {
+  const input = $('chatInput'); const q = input.value.trim(); if (!q) return; input.value = '';
+  const box = $('chatBox');
+  box.insertAdjacentHTML('beforeend', `<div class="msg user">${esc(q)}</div>`);
+  let answer = '';
+  if (lastScan && lastScan.ollamaAvailable && isLocalServer) {
+    const prompt = `You are a concise, friendly computer security advisor. Live scan of ${lastScan.hostname}: score ${lastScan.score}/100, free disk ${lastScan.freeGB} GB (${lastScan.freePct}%), free RAM ${lastScan.freeRAM} GB, findings ${JSON.stringify(lastScan.findings)}. The toolkit also has a Family Plan tab (parental controls), a Recovery Mode tab (undo snapshots and Windows repair) and an iPad/iPhone USB scanner. User question: ${q}`;
+    try { const j = await api('/api/ollama', { prompt }); if (j.ok && j.answer) answer = `[Local AI: ${j.model}]\n` + j.answer; } catch (e) {}
+  }
+  if (!answer) answer = offlineAdvisorReply(q);
+  box.insertAdjacentHTML('beforeend', `<div class="msg bot">${esc(answer)}</div>`);
+  box.scrollTop = box.scrollHeight;
+}
+
+function offlineAdvisorReply(q) {
+  const ql = q.toLowerCase();
+  if (/(kid|child|parent|family|block (a )?site|adult|screen time|bedtime)/.test(ql)) {
+    return 'Family Plan (👨‍👩‍👧 tab):\n1. Make each child their own Windows account (Settings > Accounts > Other users) and keep it a Standard account, not admin.\n2. In the Family Plan tab, tick which accounts are kids and pick their allowed hours and bedtime.\n3. Pick what to block (adult sites, gambling, social media, games...), add your own sites and search words.\n4. Leave SafeSearch, Family DNS and "turn off private browsing" on.\n5. Set a parent PIN, then click "Apply Family Plan".\nIt keeps working after you unplug the USB. For their iPad, use Screen Time (steps are in the same tab).';
+  }
+  if (/(undo|recover|restore|rollback|roll back|broke|broken|revert)/.test(ql)) {
+    return 'Recovery Mode (🛟 tab):\n• Every change the toolkit makes first saves a snapshot on the USB. Pick one, click Preview to see what would change, then Restore.\n• "Back to Windows defaults" undoes everything even without a snapshot.\n• Repair tools: System Restore point, DISM/SFC file repair, network reset, hosts reset, Safe Mode and Windows Recovery.\n• If this page won\'t open, double-click "RECOVERY MODE Windows.bat" on the USB.';
+  }
+  if (/(ipad|iphone|ios|apple|phone|tablet|android)/.test(ql)) {
+    return 'iPad / iPhone (📱 tab):\n1. Plug it in with a USB cable (Bluetooth doesn\'t count), unlock it and tap "Trust This Computer".\n2. Click "Scan Connected Device". Basic mode confirms it is connected.\n3. For the full scan (iPadOS version, passcode, storage, battery, backup encryption, apps, and "Back up to this USB"), install the free Apple Devices app from the Microsoft Store and put the libimobiledevice tools in the Tools\\libimobiledevice folder on the USB.\nAndroid works out of the box with USB debugging on.';
+  }
+  if (/(theme|color|colour|dark|hacker|look)/.test(ql)) return 'Click 🎨 Themes at the top. Pick Hacker Terminal, Cyberpunk Neon, Retro Amber, Deep Ocean, Daylight, High Contrast, or the Classic Midnight look. Your choice is saved on the USB.';
+  if (!lastScan) return 'Click "Rescan PC" at the top first so I can look at this computer.';
+  const d = lastScan;
+  if (/(infect|virus|malware|spyware|hitman|hack)/.test(ql)) {
+    return `Here is what I see on ${d.hostname}:\n• Defender real-time: ${d.controls.defenderRealTime ? 'ON' : 'OFF'}\n• Firewall: ${d.controls.firewallOn === false ? 'OFF on some networks!' : 'ON'}\n• Sticky Keys / IFEO backdoors: ${d.stickyKeysClean && d.ifeoHijacks.length === 0 ? 'none (clean)' : 'SUSPICIOUS!'}\n• Risky browser extensions: ${d.riskyExts.length}\n• Programs online right now: ${d.outboundConns.length}\n\nFor a second opinion click "🛡️ Run HitmanPro". If you think someone is in your PC right now, use the 🚨 panic button in Recovery Mode to cut the internet first.`;
+  }
+  if (/(wi-?fi|airport|public|travel|hotel|coffee)/.test(ql)) {
+    const issues = [];
+    if (d.wifi && d.wifi.connected && d.wifi.auth === 'Open') issues.push(`you are on an OPEN network (${d.wifi.ssid}) with no password - use a VPN or phone hotspot`);
+    if (!d.controls.llmnrOff) issues.push('LLMNR is ON (lets attackers grab your password hash)');
+    if (!d.controls.wifiNetbiosOff) issues.push('Wi-Fi NetBIOS port 139 is ON');
+    if (d.controls.firewallOn === false) issues.push('the firewall is OFF on some networks');
+    if (!d.controls.doSvcHttpOnly) issues.push('Windows Update P2P sharing is ON');
+    return issues.length === 0
+      ? `Yes! ${d.hostname} is well protected for airport, hotel and campus Wi-Fi.`
+      : `Not yet. Before using public Wi-Fi on ${d.hostname}, fix these:\n• ${issues.join('\n• ')}\n\nGo to ⚙️ Script Builder, pick "✈️ Travel Mode" and click "⚡ Run Selected Modules Now".`;
+  }
+  if (/(slow|space|storage|ram|full|lag)/.test(ql)) {
+    const sizes = d.cacheSizes ? Object.values(d.cacheSizes).reduce((a, b) => a + Number(b || 0), 0).toFixed(2) + ' GB' : 'several GB';
+    return `${d.hostname} has ${d.freeGB} GB (${d.freePct}%) free disk, ${d.freeRAM}/${d.totalRAM} GB free RAM and ${d.startupItems.length} startup apps.\n\nQuick wins: about ${sizes} in caches (💾 Storage tab), check big files in Downloads, and disable startup apps you don't need (🛡️ tab).${d.pendingReboot ? '\nAlso: a restart is waiting to finish updates.' : ''}`;
+  }
+  if (ql.includes('friend')) {
+    return 'On a friend\'s computer:\n1. Tabs 1 to 4 are read-only, so look first.\n2. Click "🛡️ Run HitmanPro" to scan for malware straight from the USB.\n3. Click "📄 Save Report" to keep a copy of what you found on the USB.\n4. Ask before changing anything. Every change saves a snapshot so it can be undone in Recovery Mode.';
+  }
+  if (/(port|backdoor|remote)/.test(ql)) {
+    const ports = d.listeningPorts.map(p => `${p.LocalPort} (${p.Process})`).join(', ');
+    return `Backdoor check on ${d.hostname}:\n• IFEO hijacks: ${d.ifeoHijacks.length}\n• Sticky Keys: ${d.stickyKeysClean ? 'valid' : 'TAMPERED'}\n• Listening ports: ${ports || 'none'}\n\nSee the full tables in the 🛡️ tab.`;
+  }
+  return `Score on ${d.hostname}: ${d.score}/100.\n• Free disk: ${d.freeGB} GB (${d.freePct}%)\n• Free RAM: ${d.freeRAM} GB\n• Issues found: ${d.findings.length}\n\nTry: "Is this PC infected?", "Safe for public Wi-Fi?", "Why is it slow?", "Set up the Family Plan", "How do I undo changes?" or "Scan my iPad".`;
+}
+
+// ============================================================================
+// 1-click actions
+// ============================================================================
+function showExtHelp(browser, name, id) {
+  const url = browser === 'Edge' ? 'edge://extensions' : 'chrome://extensions';
+  $('modalTitle').textContent = `How to remove: ${name}`;
+  $('modalBody').innerHTML = `<p><strong>Why it's flagged:</strong> extensions like Honey and Coupert can read your cookies and browsing history. If you only delete their folder, ${esc(browser)} sync can reinstall them.</p>
+    <div class="modal-box"><strong>Option 1 - remove it yourself (recommended):</strong><br>1. In <b>${esc(browser)}</b> go to <code>${esc(url)}</code>.<br>2. Find <b>${esc(name)}</b> and click <b>Remove</b>.</div>
+    <div class="modal-box"><strong>Option 2 - block it forever:</strong><br>The red <b>🚫 Block forever</b> button adds <code>${esc(id)}</code> to the browser's official block list so it can never come back, even through sync.</div>`;
+  $('infoModal').classList.add('open');
+}
+function blockExtension(browser, id) { return runAction('/api/block-extension', { browser, id }); }
+function blockPort(port) { return runAction('/api/block-port', { port: Number(port) }); }
+async function disableStartup(name) {
+  if (!confirm(`Stop "${pretty(name)}" from starting automatically?\n(A snapshot is saved first so you can undo it.)`)) return;
+  const j = await runAction('/api/disable-startup', { name });
+  if (j && j.ok) setTimeout(runLiveScan, 800);
+}
+async function cleanCachesNow() {
+  if (!confirm('Delete temporary files and developer caches? Documents, photos and projects are never touched.')) return;
+  const j = await runAction('/api/clean-caches', {});
+  if (j && j.ok) setTimeout(runLiveScan, 500);
+}
+function launchHitmanPro() { return runAction('/api/hitmanpro', {}); }
+async function executeLive() {
+  if (!confirm('Run the selected modules now? Windows will ask for permission, and a recovery snapshot is saved first.')) return;
+  runAction('/api/execute', { script: $('codePreview').textContent, label: 'Script Builder' });
+}
+async function shutdownServer() {
+  if (!confirm('Stop the toolkit server? You can then close this tab and unplug the USB.')) return;
+  try { await api('/api/shutdown', {}); } catch (e) {}
+  $('serverStatus').textContent = 'Server stopped. Safe to close this tab and eject the USB.';
+  showToast('Server stopped.');
+}
+
+// ============================================================================
+// Report
+// ============================================================================
+async function saveReport() {
+  if (!lastScan) return showToast('Run a scan first.', true);
+  const d = lastScan;
+  const row = (a, b) => `<tr><td>${esc(a)}</td><td>${esc(b)}</td></tr>`;
+  const { yes, no } = protectionLists(d);
+  let activity = '';
+  if (isLocalServer) {
+    try {
+      const logs = await api('/api/logs');
+      const today = (logs.files || []).find(f => f.name.startsWith('toolkit '));
+      if (today) { const t = await api('/api/log-read', { file: today.name }); activity = (t.text || '').split('\n').slice(-60).join('\n'); }
+    } catch (e) {}
+  }
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Security report ${esc(d.hostname)}</title>
+<style>body{font-family:Segoe UI,system-ui,sans-serif;max-width:960px;margin:24px auto;padding:0 16px;color:#0f172a}h1{margin-bottom:0}table{border-collapse:collapse;width:100%;margin:8px 0 20px}td,th{border:1px solid #d6dce8;padding:6px 8px;text-align:left;font-size:14px;vertical-align:top}.ok{color:#15803d}.bad{color:#b91c1c}.CRITICAL{color:#b91c1c}.HIGH{color:#c2410c}.MEDIUM{color:#b45309}.LOW{color:#0369a1}pre{background:#f1f5f9;padding:10px;font-size:12px;white-space:pre-wrap}</style></head><body>
+<h1>Security report: ${esc(d.hostname)}</h1><p>${esc(new Date().toLocaleString())} - ${esc(d.os)} - user ${esc(d.user)}</p>
+<h2>Score: ${esc(d.score)} / 100 - protected against ${yes.length} of ${yes.length + no.length} threats checked</h2>
+<h2 class="ok">Protected from</h2><table><tr><th>Threat</th><th>Protection</th></tr>${yes.map(x => `<tr><td class="ok">✔ ${esc(x.threat)}</td><td>${esc(x.lbl)}</td></tr>`).join('') || '<tr><td colspan="2">Nothing yet</td></tr>'}</table>
+<h2 class="bad">Not protected from yet</h2><table><tr><th>Threat</th><th>Missing protection</th></tr>${no.map(x => `<tr><td class="bad">✘ ${esc(x.threat)}</td><td>${esc(x.lbl)}</td></tr>`).join('') || '<tr><td colspan="2">Nothing - fully covered</td></tr>'}</table>
+<h2>Issues found</h2><table><tr><th>Severity</th><th>Issue</th><th>Fix</th></tr>${(d.findings || []).map(f => `<tr><td class="${esc(f.severity)}">${esc(f.severity)}</td><td>${esc(f.title)}</td><td>${esc(f.fix)}</td></tr>`).join('') || '<tr><td colspan="3">None</td></tr>'}</table>
+<h2>Computer</h2><table>${row('Free disk', `${d.freeGB} / ${d.totalGB} GB (${d.freePct}%)`)}${row('Free RAM', `${d.freeRAM} / ${d.totalRAM} GB`)}${row('Last boot', d.lastBoot)}${d.patchDays != null ? row('Last Windows update', d.patchDays + ' days ago') : ''}${d.wifi && d.wifi.connected ? row('Wi-Fi', `${d.wifi.ssid} (${d.wifi.auth})`) : ''}</table>
+<h2>Listening ports</h2><table>${(d.listeningPorts || []).map(p => row(p.LocalPort, p.Process)).join('') || row('None', '')}</table>
+<h2>Startup apps</h2><table>${(d.startupItems || []).map(s => row(pretty(s.Name), s.Command)).join('') || row('None', '')}</table>
+${activity ? `<h2>Recent toolkit activity (today)</h2><pre>${esc(activity)}</pre>` : ''}
+<p style="color:#5b6475">Made by PC Security Toolkit v3.1</p></body></html>`;
+  if (isLocalServer) {
+    const j = await runAction('/api/save-report', { html });
+    if (j && j.ok) return;
+  }
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${d.hostname} security report.html`; a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ============================================================================
+// Mobile: iPad / iPhone / Android
+// ============================================================================
+async function scanMobile() {
+  if (!isLocalServer) return needServer();
+  showToast('Checking USB for an iPad, iPhone or Android...');
+  $('appleBox').innerHTML = '<span class="muted">Scanning...</span>';
+  const d = await api('/api/mobile-scan');
+  const a = d.apple || {}; const an = d.android || {};
+  $('mobileStatusBox').innerHTML = `
+    <span class="stat-pill">🍎 ${esc(a.kind || 'iPad / iPhone')}: <b>${esc(a.status || 'Not detected')}</b></span>
+    <span class="stat-pill">🤖 Android: <b>${esc(an.status || 'Not detected')}</b> ${an.connected ? esc(`(${an.model}, Android ${an.version}, patch ${an.patch})`) : ''}</span>`;
+  renderApple(a);
+  $('androidTable').querySelector('tbody').innerHTML = (an.apps || []).length
+    ? an.apps.map(pkg => `<tr><td class="mono">${esc(pkg)}</td><td><button class="btn btn-red btn-sm" data-pkg="${esc(pkg)}" onclick="uninstallAndroidApp(this.dataset.pkg)">🗑️ Remove</button></td></tr>`).join('')
+    : `<tr><td colspan="2" class="muted">${esc(an.status || 'No Android device.')}${an.available === false ? ' (adb.exe is missing from Tools\\adb)' : ''}</td></tr>`;
+  showToast('Device scan finished.');
+}
+
+function renderApple(a) {
+  const box = $('appleBox');
+  if (!a.usbConnected) {
+    box.innerHTML = `<div class="finding ${a.bluetoothOnly ? 'MEDIUM' : 'LOW'}"><b>${esc(a.status)}</b>${a.bluetoothOnly ? `<br><span class="muted">Found over Bluetooth: ${esc((a.bluetoothNames || []).join(', '))}. Bluetooth can't be scanned. Use a USB cable.</span>` : ''}</div>
+      <ol class="steps muted"><li>Plug the iPad in with a USB / USB-C cable.</li><li>Unlock it. If it asks "Trust This Computer?", tap <b>Trust</b> and enter the passcode.</li><li>Click <b>Scan Connected Device</b> again.</li></ol>
+      ${a.toolsBlocked ? `<p class="small muted">Note: on this PC, Windows Smart App Control blocks the full iPad tools, so you'll get basic mode here. <button class="info-btn" onclick="showInfo('sac')">i</button></p>` : a.toolsFound ? '<p class="small muted">✔ Full iPad tools are installed.</p>' : ''}`;
+    return;
+  }
+  let html = `<div class="finding OK"><b>✅ ${esc(a.kind)} plugged in over USB</b>${a.usbNames && a.usbNames.length ? `<br><span class="muted small">Windows sees: ${esc(a.usbNames.join(', '))}</span>` : ''}</div>`;
+  if (!a.trusted) {
+    html += `<p class="small" style="margin:8px 0 4px;"><b>Turn on the full iPad scan:</b></p>
+      <div class="status-tile" style="margin-bottom:6px;"><span>1. Apple Devices app (Windows driver)</span><span class="row">${a.appleDriver ? `<span class="badge badge-on">${a.appleDriverRunning ? 'RUNNING' : 'INSTALLED'}</span>` : `<span class="badge badge-off">MISSING</span><button class="btn btn-primary btn-sm" onclick="openThing('apple-devices')">Get it</button>`}</span></div>
+      <div class="status-tile" style="margin-bottom:6px;"><span>2. libimobiledevice tools in <code>Tools\\libimobiledevice</code></span><span class="row">${a.toolsBlocked ? '<span class="badge badge-off">BLOCKED BY WINDOWS</span><button class="info-btn" onclick="showInfo(\'sac\')">i</button>' : a.toolsFound ? '<span class="badge badge-on">FOUND</span>' :'<span class="badge badge-off">MISSING</span><button class="btn btn-sec btn-sm" onclick="openThing(\'ipad-tools\')">Open folder</button>'}</span></div>
+      <div class="status-tile"><span>3. Unlock the ${esc(a.kind)} and tap Trust</span><span class="badge badge-info">${esc(a.status)}</span></div>
+      ${a.toolsBlocked ? `<div class="finding MEDIUM" style="margin-top:8px;"><b>Windows Smart App Control is blocking the iPad tools on this PC.</b> <button class="info-btn" onclick="showInfo('sac')">i</button><br><span class="muted">That's a good security feature, so leave it on. The full iPad scan works on any PC without it (for example a friend's or family PC). Basic USB detection and the checklists still work here.</span></div>` : ''}
+      ${a.toolsFound && !a.toolsBlocked ? `<div class="row" style="margin-top:8px;"><button class="btn btn-primary btn-sm" onclick="appleAction('pair')">🤝 Ask the ${esc(a.kind)} to trust this PC</button></div>` : ''}`;
+    box.innerHTML = html; return;
+  }
+  const i = a.info || {};
+  html += `<div class="grid-3" style="margin:10px 0;">
+      <div class="status-tile"><span>Name</span><b>${esc(i.name)}</b></div>
+      <div class="status-tile"><span>Model</span><b>${esc(i.model)}</b></div>
+      <div class="status-tile"><span>iPadOS / iOS</span><b>${esc(i.ios)} (${esc(i.build)})</b></div>
+      <div class="status-tile"><span>Passcode</span><span class="badge ${i.passcode ? 'badge-on' : 'badge-off'}">${i.passcode ? 'SET' : 'NONE'}</span></div>
+      <div class="status-tile"><span>Backups encrypted</span><span class="badge ${i.backupEncrypted ? 'badge-on' : 'badge-off'}">${i.backupEncrypted ? 'YES' : 'NO'}</span></div>
+      <div class="status-tile"><span>Battery</span><b>${esc(i.battery ?? '?')}%${i.charging ? ' ⚡' : ''}</b></div>
+      <div class="status-tile"><span>Storage free</span><b>${esc(i.freeGB ?? '?')} / ${esc(i.totalGB ?? '?')} GB</b></div>
+      <div class="status-tile"><span>Serial ends in</span><b class="mono">${esc(i.serialEnd)}</b></div>
+    </div>
+    ${(a.findings || []).map(f => `<div class="finding ${esc(f.severity)}"><b>[${esc(f.severity)}] ${esc(f.title)}</b><br><span class="muted">${esc(f.fix)}</span></div>`).join('') || '<div class="finding OK"><b>No problems found on this device.</b></div>'}
+    <div class="row" style="margin:10px 0;"><button class="btn btn-green btn-sm" data-u="${esc(i.udid)}" onclick="appleAction('backup', this.dataset.u)">💾 Back up to this USB</button><button class="btn btn-sec btn-sm" data-u="${esc(i.udid)}" onclick="appleAction('pair', this.dataset.u)">🤝 Re-pair</button></div>`;
+  if ((a.apps || []).length) {
+    html += `<h3>Installed apps (${a.apps.length})</h3><div class="table-wrap" style="max-height:320px; overflow:auto;"><table><thead><tr><th>App</th><th>ID</th><th></th></tr></thead><tbody>
+      ${a.apps.map(p => `<tr><td><b>${esc(p.name || p.id)}</b> <span class="muted small">${esc(p.version)}</span></td><td class="mono">${esc(p.id)}</td><td><button class="btn btn-red btn-sm" data-u="${esc(i.udid)}" data-b="${esc(p.id)}" data-n="${esc(p.name || p.id)}" onclick="appleUninstall(this.dataset.u,this.dataset.b,this.dataset.n)">Remove</button></td></tr>`).join('')}
+      </tbody></table></div>`;
+  }
+  box.innerHTML = html;
+}
+async function appleAction(action, udid) { return runAction('/api/apple-action', { action, udid: udid || '' }); }
+async function appleUninstall(udid, bundle, name) {
+  if (!confirm(`Remove "${name}" from the device? Its data on the device is deleted too.`)) return;
+  const j = await runAction('/api/apple-action', { action: 'uninstall', udid, bundle });
+  if (j && j.ok) setTimeout(scanMobile, 800);
+}
+async function uninstallAndroidApp(pkg) {
+  if (!confirm(`Remove "${pkg}" from this Android phone?`)) return;
+  await runAction('/api/android-uninstall', { pkg });
+  setTimeout(scanMobile, 500);
+}
+
+// ============================================================================
+// Script Builder
+// ============================================================================
+const presets = {
+  travel: { restorePoint:1, storageSense:1, ssdTrim:1, oneDriveOnDemand:0, defenderCore:1, defenderAsrAudit:1, firewallOn:1, blockRecall:1, blockTyping:1, blockBingSearch:1, blockClipboardVoice:1, keepRecentDocs:1, stopSpoofing:1, usbAutorun:1, disableRemote:1, disableGuest:1, doSvcHttp:1, screenLock:1, blockPublicPorts:1, dbManual:1, browserPolicy:1, filmoraLockdown:1, sasCookiesOnly:1, gns3Keep:0, wingetUpdate:0 },
+  school: { restorePoint:1, storageSense:1, ssdTrim:1, oneDriveOnDemand:0, defenderCore:1, defenderAsrAudit:1, firewallOn:1, blockRecall:1, blockTyping:1, blockBingSearch:1, blockClipboardVoice:1, keepRecentDocs:1, stopSpoofing:1, usbAutorun:1, disableRemote:1, disableGuest:1, doSvcHttp:1, screenLock:1, blockPublicPorts:1, dbManual:1, browserPolicy:1, filmoraLockdown:1, sasCookiesOnly:1, gns3Keep:0, wingetUpdate:1 },
+  work: { restorePoint:1, storageSense:1, ssdTrim:1, oneDriveOnDemand:0, defenderCore:1, defenderAsrAudit:1, firewallOn:1, blockRecall:1, blockTyping:1, blockBingSearch:1, blockClipboardVoice:1, keepRecentDocs:1, stopSpoofing:1, usbAutorun:1, disableRemote:0, disableGuest:1, doSvcHttp:1, screenLock:1, blockPublicPorts:1, dbManual:0, browserPolicy:1, filmoraLockdown:0, sasCookiesOnly:0, gns3Keep:0, wingetUpdate:1 },
+  gaming: { restorePoint:1, storageSense:1, ssdTrim:1, oneDriveOnDemand:0, defenderCore:1, defenderAsrAudit:0, firewallOn:1, blockRecall:1, blockTyping:1, blockBingSearch:1, blockClipboardVoice:1, keepRecentDocs:1, stopSpoofing:1, usbAutorun:1, disableRemote:1, disableGuest:1, doSvcHttp:1, screenLock:0, blockPublicPorts:1, dbManual:1, browserPolicy:1, filmoraLockdown:1, sasCookiesOnly:1, gns3Keep:1, wingetUpdate:1 },
+  audit: { restorePoint:0, storageSense:0, ssdTrim:0, oneDriveOnDemand:0, defenderCore:0, defenderAsrAudit:0, firewallOn:0, blockRecall:0, blockTyping:0, blockBingSearch:0, blockClipboardVoice:0, keepRecentDocs:0, stopSpoofing:0, usbAutorun:0, disableRemote:0, disableGuest:0, doSvcHttp:0, screenLock:0, blockPublicPorts:0, dbManual:0, browserPolicy:0, filmoraLockdown:0, sasCookiesOnly:0, gns3Keep:0, wingetUpdate:0 },
+};
+function applyPreset(name, btn) {
+  document.querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  for (const [id, val] of Object.entries(presets[name])) { const el = $(id); if (el) el.checked = !!val; }
+  generate();
+}
+function isChecked(id) { const el = $(id); return el && el.checked; }
+
+// Shared header for every generated script. Ensure-Key only creates a registry key when it is
+// missing (New-Item -Force on an existing key would wipe all of its values).
+const PS_HEADER = [
+  '$ErrorActionPreference = "SilentlyContinue"',
+  'if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {',
+  '    Start-Process powershell.exe -Verb RunAs -ArgumentList "-NoExit -ExecutionPolicy Bypass -File `"$PSCommandPath`""',
+  '    exit',
+  '}',
+  'function Ensure-Key([string]$Path) { if (-not (Test-Path -LiteralPath $Path)) { New-Item -Path $Path -Force | Out-Null } }',
+  '',
+];
+
+function generate() {
+  const L = ['# PC Security Toolkit - custom security, privacy and speed script', ...PS_HEADER];
+  const add = s => L.push(s + '\n');
+  if (isChecked('restorePoint')) add(String.raw`Write-Host "Creating a System Restore point..." -ForegroundColor Cyan
+Enable-ComputerRestore -Drive "C:\"
+New-ItemProperty -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\SystemRestore" -Name "SystemRestorePointCreationFrequency" -Value 0 -PropertyType DWord -Force | Out-Null
+Checkpoint-Computer -Description "Before PC Security Toolkit" -RestorePointType "MODIFY_SETTINGS"`);
+  if (isChecked('storageSense')) add(String.raw`$ss = "HKCU:\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy"; Ensure-Key $ss; Set-ItemProperty $ss "01" 1 -Type DWord -Force; Set-ItemProperty $ss "04" 1 -Type DWord -Force
+foreach ($c in @("$env:LOCALAPPDATA\npm-cache", "$env:USERPROFILE\.cache", "$env:USERPROFILE\.nuget\packages", "$env:LOCALAPPDATA\ms-playwright", "$env:LOCALAPPDATA\Temp")) { if (Test-Path $c) { Remove-Item "$c\*" -Recurse -Force } }`);
+  if (isChecked('oneDriveOnDemand')) add(String.raw`if (Test-Path "$env:USERPROFILE\OneDrive") { attrib.exe +U -P "$env:USERPROFILE\OneDrive\*" /S /D }`);
+  if (isChecked('ssdTrim')) add(`Get-Volume | Where-Object { $_.DriveLetter -and $_.DriveType -eq 'Fixed' } | ForEach-Object { Optimize-Volume -DriveLetter $_.DriveLetter -ReTrim }`);
+  if (isChecked('defenderCore')) add(`Set-MpPreference -DisableRealtimeMonitoring $false -PUAProtection Enabled -EnableNetworkProtection Enabled -CloudBlockLevel Default`);
+  if (isChecked('defenderAsrAudit')) add(`$asr = @("BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550","D4F940AB-401B-4EFC-AADC-AD5F3C50688A","3B576869-A4EC-4529-8536-B80A7769E899","75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84","D3E037E1-3EB8-44C8-A917-57927947596D","5BEB7EFE-FD9A-4556-801D-275E5FFC04CC","92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B","9E6C4E1F-7D60-472F-BA1A-A39EF669E4B2","7674BA52-37EB-4A4F-A9A1-F0F9A1619A2C","E6DB77E5-3DF2-4CF1-B95A-636979351E5B","B2B3F03D-6A65-4F7B-A9C7-1C7EF74A9BA4","C1DB55AB-C21A-4637-BB3F-A12568109D35")
+Add-MpPreference -AttackSurfaceReductionRules_Ids $asr -AttackSurfaceReductionRules_Actions ($asr | ForEach-Object { 2 })`);
+  if (isChecked('firewallOn')) add(`Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled True`);
+  if (isChecked('blockRecall')) add(String.raw`$k = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI"; Ensure-Key $k; Set-ItemProperty $k DisableAIDataAnalysis 1 -Type DWord -Force; Set-ItemProperty $k TurnOffSavingSnapshots 1 -Type DWord -Force; Set-ItemProperty $k AllowRecallEnablement 0 -Type DWord -Force`);
+  if (isChecked('blockTyping')) add(String.raw`$k = "HKCU:\Software\Microsoft\InputPersonalization"; Ensure-Key $k; Set-ItemProperty $k RestrictImplicitTextCollection 1 -Type DWord -Force; Set-ItemProperty $k RestrictImplicitInkCollection 1 -Type DWord -Force
+$k = "HKCU:\Software\Microsoft\Input\TIPC"; Ensure-Key $k; Set-ItemProperty $k Enabled 0 -Type DWord -Force`);
+  if (isChecked('blockBingSearch')) add(String.raw`$k = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer"; Ensure-Key $k; Set-ItemProperty $k DisableSearchBoxSuggestions 1 -Type DWord -Force
+$k = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search"; Ensure-Key $k; Set-ItemProperty $k BingSearchEnabled 0 -Type DWord -Force`);
+  if (isChecked('blockClipboardVoice')) add(String.raw`$k = "HKCU:\Software\Microsoft\Clipboard"; Ensure-Key $k; Set-ItemProperty $k EnableClipboardHistory 0 -Type DWord -Force; Set-ItemProperty $k EnableCloudClipboard 0 -Type DWord -Force
+$k = "HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo"; Ensure-Key $k; Set-ItemProperty $k Enabled 0 -Type DWord -Force`);
+  if (isChecked('keepRecentDocs')) add(String.raw`$k = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"; Set-ItemProperty $k Start_TrackProgs 1 -Type DWord -Force; Set-ItemProperty $k Start_TrackDocs 1 -Type DWord -Force`);
+  if (isChecked('stopSpoofing')) add(String.raw`$k = "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient"; Ensure-Key $k; Set-ItemProperty $k EnableMulticast 0 -Type DWord -Force
+Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled=TRUE" | Where-Object { $_.Description -match 'Wi-Fi|Wireless|WLAN' } | ForEach-Object { Invoke-CimMethod -InputObject $_ -MethodName SetTcpipNetbios -Arguments @{ TcpipNetbiosOptions = [uint32]2 } | Out-Null }
+$k = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad"; Ensure-Key $k; Set-ItemProperty $k WpadOverride 1 -Type DWord -Force
+Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa" LmCompatibilityLevel 5 -Type DWord -Force; Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa" restrictanonymous 1 -Type DWord -Force`);
+  if (isChecked('usbAutorun')) add(String.raw`$k = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"; Ensure-Key $k; Set-ItemProperty $k NoDriveTypeAutoRun 255 -Type DWord -Force; Set-ItemProperty $k NoAutorun 1 -Type DWord -Force`);
+  if (isChecked('disableRemote')) add(String.raw`Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance" fAllowToGetHelp 0 -Type DWord -Force
+foreach ($s in @("TermService","WinRM","LMS","RemoteRegistry")) { if (Get-Service $s) { Stop-Service $s -Force; Set-Service $s -StartupType Disabled } }`);
+  if (isChecked('disableGuest')) add(`net user Guest /active:no | Out-Null`);
+  if (isChecked('doSvcHttp')) add(String.raw`$k = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization"; Ensure-Key $k; Set-ItemProperty $k DODownloadMode 0 -Type DWord -Force`);
+  if (isChecked('screenLock')) add(`powercfg /change monitor-timeout-dc 10; powercfg /change monitor-timeout-ac 15; powercfg /SETDCVALUEINDEX SCHEME_CURRENT SUB_NONE CONSOLELOCK 1; powercfg /SETACVALUEINDEX SCHEME_CURRENT SUB_NONE CONSOLELOCK 1; powercfg /SETACTIVE SCHEME_CURRENT`);
+  if (isChecked('blockPublicPorts')) add(`foreach ($p in 3306, 5040) { if (-not (Get-NetFirewallRule -DisplayName "Block Public $p")) { New-NetFirewallRule -DisplayName "Block Public $p" -Direction Inbound -Protocol TCP -LocalPort $p -Action Block -Profile Public -Enabled True | Out-Null } }`);
+  if (isChecked('dbManual')) add('foreach ($s in @("MySQL80","MSSQL`$SQLEXPRESS","SQLTELEMETRY","SQLWriter","MapsBroker","dptftcs")) { if (Get-Service $s) { Set-Service $s -StartupType Manual; Stop-Service $s -Force } }');
+  if (isChecked('browserPolicy')) add(String.raw`foreach ($b in @("HKLM:\SOFTWARE\Policies\Microsoft\Edge", "HKLM:\SOFTWARE\Policies\Google\Chrome")) { Ensure-Key $b; Set-ItemProperty $b PasswordManagerEnabled 0 -Type DWord -Force; Set-ItemProperty $b BackgroundModeEnabled 0 -Type DWord -Force; Set-ItemProperty $b StartupBoostEnabled 0 -Type DWord -Force }`);
+  if (isChecked('filmoraLockdown')) add(`if (Get-Service NativePushService) { Stop-Service NativePushService -Force; Set-Service NativePushService -StartupType Disabled }
+Get-NetFirewallRule | Where-Object { $_.DisplayName -match 'WsToastNotification|Wondershare|NativePush|Filmora' } | Remove-NetFirewallRule
+winget pin add --id Wondershare.Filmora --blocking 2>$null`);
+  if (isChecked('sasCookiesOnly')) add(String.raw`Remove-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" SUPERAntiSpyware -Force; sc.exe config "!SASCORE" start= demand | Out-Null; sc.exe config SASKUTIL start= demand | Out-Null; sc.exe config SASDIFSV start= demand | Out-Null`);
+  if (isChecked('gns3Keep')) add(`Get-NetFirewallRule | Where-Object { $_.DisplayName -match 'GNS3|Dynamips|VPCS|Qemu' -and $_.Profile -match 'Public' } | Set-NetFirewallRule -Profile Private`);
+  if (isChecked('wingetUpdate')) add(`winget upgrade --all --silent --accept-package-agreements --accept-source-agreements --disable-interactivity`);
+  L.push('Write-Host "All selected modules finished. Undo any of it from Recovery Mode." -ForegroundColor Green');
+  $('codePreview').textContent = L.join('\n');
+}
+function downloadScript() {
+  const blob = new Blob([$('codePreview').textContent], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Custom PC Setup.ps1'; a.click(); URL.revokeObjectURL(a.href);
+  showToast('Downloaded "Custom PC Setup.ps1".');
+}
+function copyCode() { navigator.clipboard.writeText($('codePreview').textContent).then(() => showToast('Copied the script.')); }
+
+// ============================================================================
+// Family Plan
+// ============================================================================
+const FAMILY_CATS = [
+  { id: 'adult', icon: '🔞', name: 'Adult content', desc: 'Porn and explicit sites. Family DNS blocks millions more.',
+    sites: ['pornhub.com', 'xvideos.com', 'xnxx.com', 'xhamster.com', 'redtube.com', 'youporn.com', 'onlyfans.com', 'chaturbate.com', 'stripchat.com', 'spankbang.com', 'eporner.com', 'fansly.com'] },
+  { id: 'gambling', icon: '🎰', name: 'Gambling & betting', desc: 'Sports betting, casinos, crypto gambling.',
+    sites: ['bet365.com', 'draftkings.com', 'fanduel.com', 'betmgm.com', 'pokerstars.com', 'stake.com', 'stake.us', 'roobet.com', 'chumbacasino.com', 'caesars.com', 'williamhill.com', 'betway.com'] },
+  { id: 'stranger', icon: '🚷', name: 'Stranger chat', desc: 'Random video chat with strangers.',
+    sites: ['ome.tv', 'chatroulette.com', 'emeraldchat.com', 'chatrandom.com', 'camsurf.com', 'monkey.app', 'azarlive.com', 'chathub.cam'] },
+  { id: 'social', icon: '📸', name: 'Social media', desc: 'TikTok, Instagram, Snapchat, Facebook, X, Reddit...',
+    sites: ['tiktok.com', 'instagram.com', 'snapchat.com', 'facebook.com', 'x.com', 'twitter.com', 'reddit.com', 'tumblr.com', 'threads.net', 'pinterest.com', 'bsky.app'],
+    extra: ['m.facebook.com', 'web.snapchat.com', 'old.reddit.com', 'vm.tiktok.com', 'm.tiktok.com'] },
+  { id: 'chat', icon: '💬', name: 'Chat apps', desc: 'Discord, WhatsApp Web, Telegram.',
+    sites: ['discord.com', 'discord.gg', 'discordapp.com', 'telegram.org', 'web.whatsapp.com', 'kik.com'],
+    extra: ['gateway.discord.gg', 'cdn.discordapp.com', 'web.telegram.org'] },
+  { id: 'gaming', icon: '🎮', name: 'Games', desc: 'Roblox, Fortnite, Steam, browser game sites.',
+    sites: ['roblox.com', 'epicgames.com', 'fortnite.com', 'steampowered.com', 'steamcommunity.com', 'minecraft.net', 'poki.com', 'crazygames.com', 'coolmathgames.com', 'miniclip.com', 'friv.com'],
+    extra: ['web.roblox.com', 'apis.roblox.com', 'auth.roblox.com', 'setup.rbxcdn.com', 'store.steampowered.com', 'launcher-public-service-prod06.ol.epicgames.com'] },
+  { id: 'video', icon: '📺', name: 'Video & streaming', desc: 'YouTube, Twitch, Kick, Netflix.',
+    sites: ['youtube.com', 'youtu.be', 'twitch.tv', 'kick.com', 'netflix.com'], extra: ['m.youtube.com', 'youtubei.googleapis.com'] },
+  { id: 'ai', icon: '🤖', name: 'AI chatbots', desc: 'For homework rules: ChatGPT, Character.AI, Gemini...',
+    sites: ['chatgpt.com', 'openai.com', 'character.ai', 'gemini.google.com', 'claude.ai', 'perplexity.ai', 'copilot.microsoft.com', 'poe.com', 'replika.com'] },
+];
+const FAMILY_DNS = {
+  off: { name: 'Off (normal internet)', v4: [], v6: [] },
+  cloudflare: { name: 'Cloudflare for Families', note: 'Blocks malware and adult sites. Fast and reliable.', v4: ['1.1.1.3', '1.0.0.3'], v6: ['2606:4700:4700::1113', '2606:4700:4700::1003'] },
+  cleanbrowsing: { name: 'CleanBrowsing Family (strictest)', note: 'Blocks adult sites, VPN/proxy bypass sites and mixed content, and forces SafeSearch + YouTube Restricted.', v4: ['185.228.168.168', '185.228.169.168'], v6: ['2a0d:2a00:1::', '2a0d:2a00:2::'] },
+  opendns: { name: 'OpenDNS FamilyShield', note: 'Blocks adult sites. Long-running free service.', v4: ['208.67.222.123', '208.67.220.123'], v6: ['2620:119:35::123', '2620:119:53::123'] },
+};
+const DEFAULT_FAMILY = {
+  kids: [], categories: ['adult', 'gambling', 'stranger'], custom: [], words: [], dns: 'cloudflare',
+  safe: { google: true, bing: true, youtube: 'strict', noPrivate: true, noGuest: true, keepHistory: true, noDoh: true },
+};
+let familyState = null;   // server status
+let family = null;        // settings being edited
+
+async function loadFamily() {
+  if (!isLocalServer) { $('familyRoot').innerHTML = '<div class="card"><p>The Family Plan needs the toolkit server. Double-click <code>START HERE Windows.bat</code>.</p></div>'; return; }
+  if (platform !== 'Windows') { $('familyRoot').innerHTML = '<div class="card"><h2>👨‍👩‍👧 Family Plan</h2><p>The Family Plan is for Windows PCs. On a Mac, use System Settings > Screen Time > Content & Privacy (it works like an iPad). On Linux, set a family DNS filter such as 1.1.1.3 in your network settings.</p></div>'; return; }
+  familyState = await api('/api/family-status');
+  if (familyState.locked) return renderFamilyLock();
+  const s = familyState.settings || {};
+  family = JSON.parse(JSON.stringify(DEFAULT_FAMILY));
+  Object.assign(family, s); family.safe = Object.assign({}, DEFAULT_FAMILY.safe, s.safe || {});
+  family.kids = (s.kids || []).filter(k => familyState.users.some(u => u.name === k.name));
+  renderFamily();
+}
+
+function renderFamilyLock() {
+  $('familyRoot').innerHTML = `<div class="card lock-card">
+    <h2 style="justify-content:center;">🔒 Family Plan is locked</h2>
+    <p class="muted">Enter the parent PIN to view or change the Family Plan.</p>
+    <input type="password" inputmode="numeric" maxlength="8" id="pinEntry" class="pin-input" autocomplete="off" onkeydown="if(event.key==='Enter') unlockFamily()">
+    <div class="row" style="justify-content:center; margin-top:12px;"><button class="btn btn-primary" onclick="unlockFamily()">Unlock</button><button class="info-btn" onclick="showInfo('familyPin')">i</button></div>
+  </div>`;
+  setTimeout(() => $('pinEntry') && $('pinEntry').focus(), 50);
+}
+async function unlockFamily() {
+  const j = await api('/api/family-unlock', { pin: $('pinEntry').value });
+  if (j.ok) { showToast('Unlocked.'); loadFamily(); } else { showToast(j.message || 'Wrong PIN.', true); $('pinEntry').value = ''; }
+}
+async function lockFamily() { await api('/api/family-lock', {}); showToast('Family Plan locked.'); loadFamily(); }
+async function setPin() {
+  const pin = prompt('Choose a parent PIN (4 to 8 numbers). Keep it secret from the kids:');
+  if (pin === null) return;
+  if (!/^\d{4,8}$/.test(pin)) return showToast('Use 4 to 8 numbers.', true);
+  if (prompt('Type the PIN again to confirm:') !== pin) return showToast('The PINs did not match.', true);
+  const j = await api('/api/family-pin', { pin }); showToast(j.message, !j.ok); if (j.ok) loadFamily();
+}
+
+const hourLabel = h => h === 0 ? '12 AM' : h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h - 12} PM`;
+const hourOptions = (sel, from, to) => { let o = ''; for (let h = from; h <= to; h++) o += `<option value="${h}" ${h === sel ? 'selected' : ''}>${hourLabel(h)}</option>`; return o; };
+function kidFor(name) { return family.kids.find(k => k.name === name); }
+
+function renderFamily() {
+  const st = familyState;
+  const active = st.hostsBlocked > 0 || (st.policies.edge && st.policies.edge.safeSearch) || st.dns.some(d => d.provider) || st.tasks.length;
+  const dnsNow = st.dns.filter(d => d.provider).map(d => `${d.adapter}: ${d.provider}`).join(', ');
+  const others = st.users.filter(u => !u.isCurrent);
+
+  const statusTiles = `
+    <div class="grid-3">
+      <div class="status-tile"><span>Family Plan</span><span class="badge ${active ? 'badge-on' : 'badge-off'}">${active ? 'ACTIVE' : 'OFF'}</span></div>
+      <div class="status-tile"><span>Sites blocked (all apps)</span><b>${esc(st.hostsBlocked)}</b></div>
+      <div class="status-tile"><span>Browser rules (Edge / Chrome)</span><b>${esc(st.policies.edge.blockedRules)} / ${esc(st.policies.chrome.blockedRules)}</b></div>
+      <div class="status-tile"><span>SafeSearch forced</span><span class="badge ${st.policies.edge.safeSearch ? 'badge-on' : 'badge-off'}">${st.policies.edge.safeSearch ? 'YES' : 'NO'}</span></div>
+      <div class="status-tile"><span>Family DNS filter</span><span class="badge ${dnsNow ? 'badge-on' : 'badge-off'}" title="${esc(dnsNow)}">${dnsNow ? esc(st.dns.find(d => d.provider).provider) : 'OFF'}</span></div>
+      <div class="status-tile"><span>Bedtime tasks</span><b>${esc(st.tasks.filter(t => t.startsWith('Family')).length)}</b></div>
+    </div>`;
+
+  const kidsHtml = others.length ? others.map(u => {
+    const k = kidFor(u.name);
+    const on = !!k;
+    return `<div class="kid" data-user="${esc(u.name)}">
+      <div class="kid-head">
+        <label class="row" style="cursor:pointer;"><input type="checkbox" ${on ? 'checked' : ''} data-user="${esc(u.name)}" onchange="toggleKid(this.dataset.user, this.checked)">
+          <b>${esc(u.fullName || u.name)}</b> <span class="muted small">(${esc(u.name)})</span>
+          <span class="badge ${u.isAdmin ? 'badge-off' : 'badge-on'}">${u.isAdmin ? 'ADMIN' : 'STANDARD'}</span></label>
+        <span class="small muted">Sign-in hours now: ${esc((u.hours || 'All').replace(/\|/g, ', '))}</span>
+      </div>
+      ${on ? `<div class="kid-grid">
+        <label><input type="checkbox" ${k.limit ? 'checked' : ''} onchange="kidSet(this.closest('.kid').dataset.user,'limit',this.checked)"> Limit sign-in hours</label>
+        <label>School days (Mon-Fri): <select onchange="kidSet(this.closest('.kid').dataset.user,'wdFrom',+this.value)">${hourOptions(k.wdFrom, 0, 22)}</select> to <select onchange="kidSet(this.closest('.kid').dataset.user,'wdTo',+this.value)">${hourOptions(k.wdTo, 1, 23)}</select></label>
+        <label>Weekends (Sat-Sun): <select onchange="kidSet(this.closest('.kid').dataset.user,'weFrom',+this.value)">${hourOptions(k.weFrom, 0, 22)}</select> to <select onchange="kidSet(this.closest('.kid').dataset.user,'weTo',+this.value)">${hourOptions(k.weTo, 1, 23)}</select></label>
+        <label><input type="checkbox" ${k.bedtime ? 'checked' : ''} onchange="kidSet(this.closest('.kid').dataset.user,'bedtime',this.checked)"> Bedtime: warn 5 min before, then sign out</label>
+        ${u.isAdmin ? `<label style="color:var(--bad-text)"><input type="checkbox" ${k.standard ? 'checked' : ''} onchange="kidSet(this.closest('.kid').dataset.user,'standard',this.checked)"> Make this a Standard account (strongly recommended, otherwise they can undo the plan)</label>` : '<span class="small muted">✔ Standard account, so they cannot undo the plan.</span>'}
+      </div>` : ''}
+    </div>`;
+  }).join('') : `<div class="finding MEDIUM"><b>No other accounts on this PC yet.</b><br><span class="muted">Each child should have their own Standard account. Add one in Settings > Accounts > Other users, then come back and click Refresh.</span></div>`;
+
+  const cats = FAMILY_CATS.map(c => `<label class="cat ${family.categories.includes(c.id) ? 'on' : ''}">
+      <input type="checkbox" ${family.categories.includes(c.id) ? 'checked' : ''} onchange="toggleCat('${c.id}', this.checked)">
+      <span><b>${c.icon} ${esc(c.name)}</b><br><span class="small muted">${esc(c.desc)}</span><br><span class="small muted" title="${esc(c.sites.join(', '))}">${c.sites.length} sites: ${esc(c.sites.slice(0, 3).join(', '))}...</span></span></label>`).join('');
+
+  const dns = Object.entries(FAMILY_DNS).map(([id, p]) => `<label class="opt-item"><input type="radio" name="famdns" ${family.dns === id ? 'checked' : ''} onchange="family.dns='${id}'"><span><span class="opt-label">${esc(p.name)}</span>${p.note ? `<span class="opt-sub">${esc(p.note)}</span>` : ''}</span></label>`).join('');
+  const sf = family.safe;
+  const chk = (key, label, sub) => `<label class="opt-item"><input type="checkbox" ${sf[key] ? 'checked' : ''} onchange="family.safe.${key}=this.checked"><span><span class="opt-label">${label}</span>${sub ? `<span class="opt-sub">${sub}</span>` : ''}</span></label>`;
+
+  $('familyRoot').innerHTML = `
+    <div class="card">
+      <h2><span class="h-left">👨‍👩‍👧 Family Plan <button class="info-btn" onclick="showInfo('family')">i</button></span>
+        <span class="row">
+          <button class="btn btn-sec btn-sm" onclick="loadFamily()">🔄 Refresh</button>
+          ${st.hasPin ? '<button class="btn btn-sec btn-sm" onclick="lockFamily()">🔒 Lock</button><button class="btn btn-sec btn-sm" onclick="setPin()">Change PIN</button>' : '<button class="btn btn-amber btn-sm" onclick="setPin()">🔑 Set a parent PIN</button>'}
+        </span></h2>
+      ${statusTiles}
+      ${!st.hasPin ? '<p class="small" style="color:var(--amber);margin-bottom:0;">Tip: set a parent PIN so the kids can\'t open this screen.</p>' : ''}
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="card">
+          <h2>1. Who are the kids?</h2>
+          <p class="small muted" style="margin-top:0;">Tick each child's Windows account. You (${esc(st.currentUser)}) are never restricted.</p>
+          ${kidsHtml}
+          <div class="row"><button class="btn btn-sec btn-sm" onclick="openThing('accounts')">➕ Add a child account (Windows Settings)</button><button class="btn btn-sec btn-sm" onclick="openThing('family-web')">Microsoft Family Safety website</button></div>
+        </div>
+        <div class="card">
+          <h2>2. What should be blocked?</h2>
+          <div class="cat-grid">${cats}</div>
+          <h3>Extra websites to block</h3>
+          <textarea id="famCustom" placeholder="One per line, for example:&#10;example.com&#10;somegame.io" onchange="family.custom=parseSites(this.value)">${esc((family.custom || []).join('\n'))}</textarea>
+          <h3>Blocked search words</h3>
+          <textarea id="famWords" placeholder="One word or phrase per line" onchange="family.words=parseWords(this.value)">${esc((family.words || []).join('\n'))}</textarea>
+          <p class="small muted">Searches that start with these words are blocked on Google, Bing, YouTube, DuckDuckGo and Yahoo in Edge and Chrome. SafeSearch and the family DNS filter catch the rest.</p>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h2>3. Safe browsing</h2>
+          ${chk('google', 'Force Google SafeSearch', 'Hides explicit images and results. Kids cannot turn it off.')}
+          ${chk('bing', 'Force Bing SafeSearch (strict)')}
+          <label class="opt-item"><span style="padding-left:24px;"><span class="opt-label">YouTube Restricted Mode</span>
+            <select onchange="family.safe.youtube=this.value" style="margin-top:4px;">
+              <option value="strict" ${sf.youtube === 'strict' ? 'selected' : ''}>Strict</option>
+              <option value="moderate" ${sf.youtube === 'moderate' ? 'selected' : ''}>Moderate</option>
+              <option value="off" ${sf.youtube === 'off' ? 'selected' : ''}>Off</option></select></span></label>
+          ${chk('noPrivate', 'Turn off InPrivate / Incognito windows', 'So the rules and history always apply.')}
+          ${chk('noGuest', 'Turn off browser Guest mode')}
+          ${chk('keepHistory', 'Kids can\'t delete browser history', 'So you can check what was looked up.')}
+          ${chk('noDoh', 'Stop browsers getting around the filter', 'Turns off "secure DNS" bypass in Edge, Chrome and Firefox.')}
+        </div>
+        <div class="card">
+          <h2>4. Family DNS filter (whole PC)</h2>
+          <p class="small muted" style="margin-top:0;">Filters every app and browser on this PC, including sites that aren't on any list.</p>
+          ${dns}
+        </div>
+        <div class="card">
+          <h2>5. Turn it on</h2>
+          <div class="row">
+            <button class="btn btn-green" onclick="applyFamily()">✅ Apply Family Plan</button>
+            <button class="btn btn-sec" onclick="saveFamily()">💾 Save settings</button>
+            <button class="btn btn-sec" onclick="previewFamily()">👁️ Preview script</button>
+            <button class="btn btn-red" onclick="removeFamily()">Turn Family Plan off</button>
+          </div>
+          <p class="small muted">Windows asks for permission, and a recovery snapshot is saved first. Restart the browsers afterwards. Everything keeps working after you unplug the USB.</p>
+          <pre id="familyPreview" style="display:none; margin-top:10px;"></pre>
+        </div>
+        <div class="card">
+          <h2>📱 Kids' iPad or iPhone (Screen Time)</h2>
+          <ol class="steps">
+            <li>On the child's iPad: <b>Settings > Screen Time > Turn On</b>, then pick <b>This is My Child's iPad</b>. Or set it up from your iPhone with Family Sharing.</li>
+            <li><b>Content & Privacy Restrictions > App Store, Media, Web & Games > Web Content > Limit Adult Websites.</b> Add any sites from your list under "Never Allow".</li>
+            <li><b>Downtime</b> = the same bedtime you picked above. <b>App Limits</b> for games and social media.</li>
+            <li>Set a <b>Screen Time passcode</b> that's different from the iPad passcode.</li>
+            <li>Turn on <b>Ask to Buy</b> in Family Sharing so new apps need your OK.</li>
+          </ol>
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleKid(name, on) {
+  if (on && !kidFor(name)) {
+    const u = familyState.users.find(x => x.name === name);
+    family.kids.push({ name, limit: true, wdFrom: 7, wdTo: 21, weFrom: 8, weTo: 22, bedtime: true, standard: !!(u && u.isAdmin) });
+  } else if (!on) family.kids = family.kids.filter(k => k.name !== name);
+  renderFamily();
+}
+function kidSet(name, key, val) {
+  const k = kidFor(name); if (!k) return; k[key] = val;
+  if (k.wdFrom >= k.wdTo) k.wdTo = Math.min(23, k.wdFrom + 1);
+  if (k.weFrom >= k.weTo) k.weTo = Math.min(23, k.weFrom + 1);
+  if (key.match(/From|To/)) renderFamily();
+}
+function toggleCat(id, on) { family.categories = family.categories.filter(c => c !== id); if (on) family.categories.push(id); renderFamily(); }
+function parseSites(text) {
+  return [...new Set(text.split(/[\s,]+/).map(s => s.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '')).filter(s => /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(s)))];
+}
+function parseWords(text) {
+  return [...new Set(text.split('\n').map(s => s.trim().toLowerCase().replace(/\s+/g, ' ')).filter(s => /^[\p{L}\p{N} '-]{2,40}$/u.test(s)))];
+}
+
+function readFamilyForm() {
+  if ($('famCustom')) family.custom = parseSites($('famCustom').value);
+  if ($('famWords')) family.words = parseWords($('famWords').value);
+}
+
+const psq = s => "'" + String(s).replace(/'/g, "''") + "'";
+const psArr = list => list.length ? '@(\n    ' + list.map(psq).join(',\n    ') + '\n)' : '@()';
+
+function buildFamilyScript() {
+  readFamilyForm();
+  const sites = new Set(), hosts = new Set();
+  for (const c of FAMILY_CATS) if (family.categories.includes(c.id)) {
+    c.sites.forEach(s => { sites.add(s); hosts.add(s); hosts.add('www.' + s); });
+    (c.extra || []).forEach(s => hosts.add(s));
+  }
+  (family.custom || []).forEach(s => { sites.add(s); hosts.add(s); hosts.add('www.' + s); });
+  if (family.safe.noDoh) hosts.add('use-application-dns.net');   // tells Firefox not to bypass with its own DNS
+  const urlRules = [...sites];
+  for (const w of family.words || []) {
+    const q = encodeURIComponent(w).replace(/%20/g, '+');
+    urlRules.push(`google.com/search?q=${q}*`, `bing.com/search?q=${q}*`, `duckduckgo.com/?q=${q}*`, `youtube.com/results?search_query=${q}*`, `search.yahoo.com/search?p=${q}*`);
+  }
+  const sf = family.safe; const dns = FAMILY_DNS[family.dns] || FAMILY_DNS.off;
+  const L = ['# PC Security Toolkit - Family Plan', `# Made ${new Date().toLocaleString()}`, ...PS_HEADER, '$nl = [Environment]::NewLine', ''];
+
+  L.push('# ---------- 1. Block websites for every app (hosts file) ----------', String.raw`$hostsPath = "$env:SystemRoot\System32\drivers\etc\hosts"
+$startMark = '# >>> PC Security Toolkit Family Plan >>>'
+$endMark = '# <<< PC Security Toolkit Family Plan <<<'
+$blocked = ${psArr([...hosts])}
+attrib.exe -r $hostsPath | Out-Null
+$text = [IO.File]::ReadAllText($hostsPath)
+$pattern = '(?s)\r?\n?' + [regex]::Escape($startMark) + '.*?' + [regex]::Escape($endMark) + '\r?\n?'
+$text = [regex]::Replace($text, $pattern, $nl).TrimEnd()
+if ($blocked.Count -gt 0) {
+    $lines = @('', $startMark) + @($blocked | ForEach-Object { '0.0.0.0 ' + $_ }) + @($endMark)
+    $text = $text + $nl + ($lines -join $nl)
+}
+[IO.File]::WriteAllText($hostsPath, $text + $nl, [Text.Encoding]::ASCII)
+ipconfig.exe /flushdns | Out-Null
+Write-Host ("Blocked " + $blocked.Count + " website addresses for every app.") -ForegroundColor Green
+`);
+
+  L.push('# ---------- 2. Browser rules (Edge, Chrome, Firefox) ----------', String.raw`$edge = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+$chrome = 'HKLM:\SOFTWARE\Policies\Google\Chrome'
+$firefox = 'HKLM:\SOFTWARE\Policies\Mozilla\Firefox'
+foreach ($b in @($edge, $chrome)) {
+    Ensure-Key $b
+    foreach ($v in @('ForceGoogleSafeSearch','ForceYouTubeRestrict','ForceBingSafeSearch','InPrivateModeAvailability','IncognitoModeAvailability','BrowserGuestModeEnabled','AllowDeletingBrowserHistory','DnsOverHttpsMode')) { Remove-ItemProperty -LiteralPath $b -Name $v -Force }
+    if (Test-Path -LiteralPath "$b\URLBlocklist") { Remove-Item -LiteralPath "$b\URLBlocklist" -Recurse -Force }
+}
+foreach ($k in @("$firefox\WebsiteFilter", "$firefox\DNSOverHTTPS")) { if (Test-Path -LiteralPath $k) { Remove-Item -LiteralPath $k -Recurse -Force } }`);
+  if (sf.google) L.push(`foreach ($b in @($edge, $chrome)) { Set-ItemProperty $b ForceGoogleSafeSearch 1 -Type DWord -Force }`);
+  if (sf.youtube !== 'off') L.push(`foreach ($b in @($edge, $chrome)) { Set-ItemProperty $b ForceYouTubeRestrict ${sf.youtube === 'strict' ? 2 : 1} -Type DWord -Force }`);
+  if (sf.bing) L.push(`Set-ItemProperty $edge ForceBingSafeSearch 2 -Type DWord -Force`);
+  if (sf.noPrivate) L.push(`Set-ItemProperty $edge InPrivateModeAvailability 1 -Type DWord -Force`, `Set-ItemProperty $chrome IncognitoModeAvailability 1 -Type DWord -Force`);
+  if (sf.noGuest) L.push(`foreach ($b in @($edge, $chrome)) { Set-ItemProperty $b BrowserGuestModeEnabled 0 -Type DWord -Force }`);
+  if (sf.keepHistory) L.push(`foreach ($b in @($edge, $chrome)) { Set-ItemProperty $b AllowDeletingBrowserHistory 0 -Type DWord -Force }`);
+  if (sf.noDoh) L.push(`foreach ($b in @($edge, $chrome)) { Set-ItemProperty $b DnsOverHttpsMode 'off' -Type String -Force }`,
+    String.raw`Ensure-Key "$firefox\DNSOverHTTPS"; Set-ItemProperty "$firefox\DNSOverHTTPS" Enabled 0 -Type DWord -Force; Set-ItemProperty "$firefox\DNSOverHTTPS" Locked 1 -Type DWord -Force`);
+  L.push(String.raw`$urlRules = ${psArr(urlRules)}
+if ($urlRules.Count -gt 0) {
+    foreach ($b in @($edge, $chrome)) {
+        Ensure-Key "$b\URLBlocklist"
+        $i = 1; foreach ($u in $urlRules) { Set-ItemProperty "$b\URLBlocklist" "$i" $u -Type String -Force; $i++ }
+    }
+}
+$ffSites = ${psArr([...sites])}
+if ($ffSites.Count -gt 0) {
+    Ensure-Key "$firefox\WebsiteFilter\Block"
+    $i = 1; foreach ($s in $ffSites) { Set-ItemProperty "$firefox\WebsiteFilter\Block" "$i" ("*://*." + $s + "/*") -Type String -Force; $i++ }
+}
+Write-Host ("Browser rules set: " + $urlRules.Count + " blocked sites and searches.") -ForegroundColor Green
+`);
+
+  L.push('# ---------- 3. Family DNS filter ----------');
+  const famIps = Object.values(FAMILY_DNS).flatMap(p => p.v4.concat(p.v6));
+  if (dns.v4.length) {
+    L.push(`$familyDns = ${psArr(dns.v4.concat(dns.v6))}`,
+      `foreach ($a in @(Get-NetAdapter -Physical)) { Set-DnsClientServerAddress -InterfaceIndex $a.ifIndex -ServerAddresses $familyDns }`,
+      `ipconfig.exe /flushdns | Out-Null`, `Write-Host ${psq('Family DNS filter on: ' + dns.name)} -ForegroundColor Green`, '');
+  } else {
+    L.push(`$knownFamilyDns = ${psArr(famIps)}`,
+      `foreach ($a in @(Get-NetAdapter -Physical)) { $cur = @((Get-DnsClientServerAddress -InterfaceIndex $a.ifIndex).ServerAddresses); if ($cur | Where-Object { $knownFamilyDns -contains $_ }) { Set-DnsClientServerAddress -InterfaceIndex $a.ifIndex -ResetServerAddresses } }`, '');
+  }
+
+  L.push('# ---------- 4. Kids\' accounts: sign-in hours, bedtime, Standard account ----------', String.raw`$taskFolder = '\PC Security Toolkit\'
+try { $sch = New-Object -ComObject Schedule.Service; $sch.Connect(); foreach ($t in @($sch.GetFolder('\PC Security Toolkit').GetTasks(1))) { if ($t.Name -like 'Family Bedtime *') { Unregister-ScheduledTask -TaskPath $taskFolder -TaskName $t.Name -Confirm:$false } } } catch {}
+$bedDir = Join-Path $env:ProgramData 'PC Security Toolkit'
+$bedScript = Join-Path $bedDir 'Bedtime.ps1'
+New-Item -ItemType Directory -Path $bedDir -Force | Out-Null
+@'
+param([string]$User)
+msg.exe $User /TIME:120 "Bedtime in 5 minutes. Save your work now. (Family Plan)" 2>$null
+Start-Sleep -Seconds 300
+foreach ($line in @(quser.exe 2>$null | Select-Object -Skip 1)) {
+    $parts = ($line.Trim() -replace '^>', '') -split '\s+'
+    if ($parts[0] -ieq $User) {
+        $id = $parts | Where-Object { $_ -match '^\d+$' } | Select-Object -First 1
+        if ($id) { logoff.exe $id }
+    }
+}
+'@ | Set-Content -LiteralPath $bedScript -Encoding UTF8
+$admins = @(net localgroup Administrators | Select-Object -Skip 6 | Where-Object { $_ -and $_ -notmatch 'command completed' } | ForEach-Object { $_.Trim() })
+`);
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  for (const k of family.kids) {
+    const n = psq(k.name);
+    L.push(`# ${k.name.replace(/[\r\n]/g, '')}`);
+    if (k.limit) L.push(`net user ${n} ${psq(`/times:M-F,${k.wdFrom}:00-${k.wdTo}:00;Sa-Su,${k.weFrom}:00-${k.weTo}:00`)} | Out-Null`,
+      `Write-Host ${psq(`${k.name}: can sign in ${hourLabel(k.wdFrom)}-${hourLabel(k.wdTo)} on school days, ${hourLabel(k.weFrom)}-${hourLabel(k.weTo)} on weekends.`)} -ForegroundColor Green`);
+    else L.push(`net user ${n} /times:all | Out-Null`);
+    if (k.limit && k.bedtime) {
+      const at = h => `${String(h - 1).padStart(2, '0')}:55`;
+      L.push(`$action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument ('-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "' + $bedScript + '" -User ' + ${psq('"' + k.name + '"')})`,
+        `$triggers = @((New-ScheduledTaskTrigger -Weekly -DaysOfWeek ${days.join(',')} -At '${at(k.wdTo)}'), (New-ScheduledTaskTrigger -Weekly -DaysOfWeek Saturday,Sunday -At '${at(k.weTo)}'))`,
+        `Register-ScheduledTask -TaskPath $taskFolder -TaskName ${psq('Family Bedtime ' + k.name)} -Action $action -Trigger $triggers -Principal (New-ScheduledTaskPrincipal -UserId 'SYSTEM' -RunLevel Highest) -Force | Out-Null`);
+    }
+    if (k.standard) L.push(`if ($admins -contains ${n} -and ${n} -ne $env:USERNAME -and @($admins | Where-Object { $_ -ne ${n} }).Count -ge 1) { net localgroup Administrators ${n} /delete | Out-Null; net localgroup Users ${n} /add 2>$null | Out-Null; Write-Host ${psq(k.name + ' is now a Standard account.')} -ForegroundColor Green }`);
+    L.push('');
+  }
+  L.push('Write-Host ""', 'Write-Host "Family Plan is on. Restart Edge / Chrome / Firefox to finish." -ForegroundColor Green');
+  return L.join('\n');
+}
+
+function previewFamily() { const p = $('familyPreview'); p.textContent = buildFamilyScript(); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
+async function saveFamily() { readFamilyForm(); const j = await api('/api/family-save', { settings: family }); showToast(j.message, !j.ok); }
+async function applyFamily() {
+  readFamilyForm();
+  const blocked = family.categories.length + (family.custom || []).length;
+  const kids = family.kids.map(k => k.name).join(', ') || 'no accounts selected';
+  if (!confirm(`Apply the Family Plan to this PC?\n\nKids: ${kids}\nBlocked groups and sites: ${blocked}\nSearch words: ${(family.words || []).length}\nDNS filter: ${(FAMILY_DNS[family.dns] || FAMILY_DNS.off).name}\n\nWindows will ask for permission. A recovery snapshot is saved first.`)) return;
+  const j = await api('/api/family-apply', { settings: family, script: buildFamilyScript() });
+  showToast(j.message, !j.ok);
+  if (j.ok) setTimeout(loadFamily, 15000);
+}
+async function removeFamily() {
+  if (!confirm('Turn the Family Plan off? Website blocks, SafeSearch rules, the DNS filter, sign-in hours and bedtime tasks are all removed.')) return;
+  const j = await api('/api/family-remove', {}); showToast(j.message, !j.ok);
+  if (j.ok) setTimeout(loadFamily, 12000);
+}
+
+// ============================================================================
+// Recovery Mode
+// ============================================================================
+async function loadSnapshots() {
+  if (!isLocalServer) { $('snapList').innerHTML = 'Recovery Mode needs the toolkit server. If the dashboard will not start, double-click <code>RECOVERY MODE Windows.bat</code>.'; return; }
+  if (platform !== 'Windows') { $('snapList').innerHTML = 'Snapshots and repair tools are for Windows. On a Mac use Time Machine and macOS Recovery (hold the power button on Apple silicon). On Linux use Timeshift snapshots and the recovery option in your boot menu.'; return; }
+  const j = await api('/api/recovery-list');
+  const list = j.snapshots || [];
+  $('snapList').innerHTML = list.length ? list.map(s => `<div class="snap">
+      <span><b>${esc(s.label)}</b><br><span class="small muted">${esc(new Date(s.created).toLocaleString())} - ${esc(s.sizeKB)} KB ${s.elevated ? '' : '- taken without admin (Defender details may be missing)'}</span></span>
+      <span class="row"><button class="btn btn-sec btn-sm" data-f="${esc(s.file)}" onclick="previewSnapshot(this.dataset.f)">👁️ Preview</button><button class="btn btn-amber btn-sm" data-f="${esc(s.file)}" data-l="${esc(s.label)}" onclick="restoreSnapshot(this.dataset.f, this.dataset.l)">↩️ Restore</button></span>
+    </div>`).join('') : `<p class="muted">No snapshots for ${esc(j.computer)} yet. One is made automatically before the toolkit changes anything, or click "Take Snapshot Now".</p>`;
+}
+async function takeSnapshot() {
+  if (!isLocalServer) return needServer();
+  showToast('Saving a snapshot (about 5 seconds)...');
+  const j = await api('/api/recovery-snapshot', { label: $('snapLabel').value || 'Manual snapshot' });
+  showToast(j.message, !j.ok); $('snapLabel').value = ''; loadSnapshots();
+}
+async function previewSnapshot(file) {
+  const box = $('previewBox'); box.style.display = 'block'; box.textContent = 'Comparing this PC with the snapshot...';
+  const j = await api('/api/recovery-preview', { file });
+  box.textContent = j.output || 'No output.';
+}
+async function restoreSnapshot(file, label) {
+  if (!confirm(`Put this PC's settings back to "${label}"?\n\nTip: click Preview first to see the changes. The current state is saved first, so this can be undone too.`)) return;
+  runAction('/api/recovery-action', { action: 'Restore', file });
+}
+async function recoveryAction(action, question) {
+  if (question && !confirm(question)) return;
+  runAction('/api/recovery-action', { action });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+# MASTER PROMPT FOR FUTURE SYSTEM OPTIMIZATION, STORAGE & TRAVEL SECURITY AUDITS
+# Copy and paste everything inside the block below into any AI agent (Antigravity, Claude, ChatGPT)
+# whenever you set up a new computer or want a fast, complete checkup of this laptop.
+
+================================================================================
+COPY EVERYTHING BELOW THIS LINE:
+================================================================================
+
+I want you to audit, optimize, and harden this Windows 11 computer (used for schoolwork, coding, video editing, and travel) in ONE streamlined pass without breaking any of my workflows.
+
+Follow these exact rules and preferences—do not make me go back and forth through 20 turns:
+
+### RULE 1: SAFETY, BASELINE & ROLLBACK FIRST
+1. Before changing anything, create a System Restore Point and generate a `Rollback_To_Original_Settings.ps1` script on my Desktop.
+2. Bundle all Administrator commands into a SINGLE self-elevating PowerShell script (`Start-Process powershell.exe -Verb RunAs ...`) so I only have to click "Yes" on one UAC prompt.
+3. Never delete my personal files in Documents, Desktop, Music, or Downloads without listing the largest files (>500 MB) and asking me first.
+
+### RULE 2: STORAGE & SSD OPTIMIZATION
+1. Automatically clean 100% safe developer/system caches: `%LOCALAPPDATA%\npm-cache`, `%USERPROFILE%\.cache`, `%USERPROFILE%\.nuget\packages`, `%LOCALAPPDATA%\ms-playwright`, and `%LOCALAPPDATA%\Temp`.
+2. Check if OneDrive files are hydrated locally; if SSD free space is low, offer `attrib +U -P "$env:USERPROFILE\OneDrive\*" /S /D` (Files On-Demand) so files stay in the cloud without eating local SSD space.
+3. Never manually delete `C:\ProgramData\Microsoft\Windows\Containers` (Windows Sandbox hard links).
+4. Once space is freed, run `Optimize-Volume -DriveLetter C -ReTrim` to TRIM the NVMe SSD.
+
+### RULE 3: MY SPECIFIC APP PREFERENCES (DO NOT BREAK THESE!)
+1. **Wondershare Filmora (Offline Isolation + Keep Login):**
+   - Preserve my existing logged-in session (`%APPDATA%\Wondershare\Wondershare Filmora`, `BSWsid.dll`, `FFWsRegister.dll`).
+   - DO NOT rename or delete `.dll` files inside the main Filmora folder (like `WSQtAbSDK.dll`) or UI helpers (`CefViewWing.exe`, `WebBrowser.exe`) because Filmora checks them at startup.
+   - Instead: Stop & Disable `NativePushService`, rename standalone spyware/updater `.exe` files (`WsToastNotification.exe` on port 8090, `DataReporting.exe`, `CrashReporter.exe`, `BsSndRpt64.exe`, `BugSplatHD64.exe`, `FeedBackUnit.exe`, `Wondershare NativePush.exe`, `Wondershare Helper Compact.exe`, `Wondershare Filmora Update*.exe`) to `.disabled`, set `EnableAD=0`/`EnableUpdate=0`/`TipsEnable=0` in `Customization.xml`, lock `Wondershare NativePush` folder ACLs to `ReadAndExecute` for non-admins, block ALL Filmora/Wondershare `.exe` files Inbound & Outbound in Windows Firewall, and pin `Wondershare.Filmora` in `winget` (`winget pin add --id Wondershare.Filmora --blocking`) so updates never overwrite this lockdown.
+   - If Windows Defender Controlled Folder Access blocks `Wondershare Filmora.exe` from `%USERPROFILE%\Documents\Wondershare`, remind me to allow it in Ransomware Protection history.
+2. **SUPERAntiSpyware (Cookies-Only + File Shredder Only):**
+   - Keep SUPERAntiSpyware installed and updated ONLY for scanning tracking cookies and right-click file shredding (`ScanDisplayContextMenu = yes`, `ScanCleanCookies = yes`, `ScanCustomCookies = yes`).
+   - Disable its memory/registry/folder scanning and kernel direct access (`ScanUseKernelFileDirect = no`, `ScanUseKernelRegistryDirect = no`) in `SAS_CURRENTUSER.DB3`.
+   - Remove it from Windows Startup (`HKCU\...\Run`), set its service (`!SASCORE`) and drivers (`SASKUTIL`, `SASDIFSV`) to `Manual` (`demand`), and strip `Everyone` write access from `C:\ProgramData\SUPERAntiSpyware.com\SUPERAntiSpyware\ToolLib` (`takeown` + `icacls`).
+3. **Games Policy:**
+   - **Minecraft** (and `XboxIdentityProvider` required for Minecraft login) is the ONLY game allowed on this computer. Remove any other games (Steam, Team Fortress 2, Roblox, etc.) and their leftover firewall rules.
+4. **Windows Apps to KEEP:**
+   - Keep `Microsoft.BingWeather`, `Microsoft.BingNews` (with ads disabled), `Microsoft.PowerAutomateDesktop`, `Microsoft.WindowsFeedbackHub`, `Microsoft.GetHelp`, `Microsoft.YourPhone` / `MicrosoftWindows.CrossDevice` (Phone Link), and `Microsoft.Todos`.
+5. **Startup & Background Services:**
+   - Only `OneDrive`, `Proton VPN`, and `Signal` (plus Windows Security & audio drivers) should auto-start at login.
+   - Set heavy database services (`MySQL80`, `MSSQL$SQLEXPRESS`, `SQLTELEMETRY`, `SQLWriter`) to `Manual` and stop them so they only run when I need them.
+
+### RULE 4: SCHOOL & TRAVEL NETWORK SECURITY HARDENING
+1. Close and block all unnecessary listening ports on Public Wi-Fi:
+   - Block MySQL (`3306`, `33060`) and `CDPSvc` (`5040`) on `Public` firewall profiles (keep `CDPSvc` service running for Bluetooth/Phone Link).
+   - Stop and Disable Intel AMT (`LMS` on ports `623`/`16992`), Remote Desktop (`TermService`), and Windows Remote Management (`WinRM`).
+   - Delete any `Public` Inbound Allow firewall rules for removed apps or local lab tools.
+2. Disable Wi-Fi broadcast/spoofing vectors:
+   - Disable **LLMNR** (`EnableMulticast = 0` in `HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient`).
+   - Disable **NetBIOS over TCP/IP** on the Wi-Fi adapter (`TcpipNetbiosOptions = 2`) and verify TCP port `139` is closed on the Wi-Fi IP.
+   - Disable **WPAD Proxy Spoofing** (`AutoDetect = 0` and `WpadOverride = 1`).
+   - Enforce **NTLMv2-Only Authentication** (`LmCompatibilityLevel = 5`) and `restrictanonymous = 1` in `HKLM:\SYSTEM\CurrentControlSet\Control\Lsa`.
+3. Disable **Windows Remote Assistance** (`fAllowToGetHelp = 0`) and **USB AutoRun/AutoPlay** (`NoDriveTypeAutoRun = 255`, `NoAutorun = 1`, `DisableAutoplay = 1`).
+4. Set screen lock timeout to **10 minutes on battery / 15 minutes on AC power** with password/PIN required on wake (`CONSOLELOCK = 1`).
+5. Enable **Microsoft Defender Real-Time Protection**, **PUA Protection (`1`)**, **Network Protection (`1`)**, keep Cloud Protection at `Default (0)`, and enable the 12 standard **Attack Surface Reduction (ASR)** rules in **Audit Mode (`2`)**.
+
+### RULE 5: WINDOWS PRIVACY, ANTI-KEYLOGGING & BROWSER HARDENING
+1. **Block Windows Recall (Screenshot Logging):** Set `DisableAIDataAnalysis = 1`, `TurnOffSavingSnapshots = 1`, and `AllowRecallEnablement = 0` in `HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI`.
+2. **Block Windows Typing & Inking Keystroke Harvesting:** Set `RestrictImplicitTextCollection = 1`, `RestrictImplicitInkCollection = 1`, `HarvestContacts = 0`, `AcceptedPrivacyPolicy = 0`, and `TIPC\Enabled = 0`.
+3. **Block Start Menu Bing Keystroke Streaming & Search History:** Set `DisableSearchBoxSuggestions = 1`, `BingSearchEnabled = 0`, and `IsDeviceSearchHistoryEnabled = 0`.
+4. **Block Voice Telemetry, Clipboard History/Cloud Sync, Location & Ad ID:** Set `OnlineSpeechPrivacy\HasAccepted = 0`, `EnableClipboardHistory = 0`, `EnableCloudClipboard = 0`, `location\Value = Deny`, `AdvertisingInfo\Enabled = 0`, `TailoredExperiencesWithDiagnosticDataEnabled = 0`, and disable `\SoftLanding\*` and `\GoogleUserPEH\*` scheduled tasks.
+5. **Keep App Launch & Recent Document Tracking ON** (`Start_TrackProgs = 1`, `Start_TrackDocs = 1`) so my Start Menu recent items work.
+6. **Keep `DiagTrack` and `DoSvc` Services Running**, but set `AllowTelemetry = 1` (Basic), set Delivery Optimization `DODownloadMode = 0` (HTTP-Only, no P2P sharing), and set `MapsBroker` and Intel Telemetry (`dptftcs`) to `Manual`.
+7. **Browser Hardening (Edge & Chrome):**
+   - Set `PasswordManagerEnabled = 0`, `BackgroundModeEnabled = 0`, and `StartupBoostEnabled = 0` in `HKLM:\SOFTWARE\Policies\Microsoft\Edge` and `Google\Chrome` (I use **Proton Pass** + **YubiKey** for passwords).
+   - Verify `0` plaintext/DPAPI passwords are stored in Edge and Chrome's local `Login Data` SQLite databases.
+   - Remove bloatware/coupon-tracking extensions (`McAfee Web Boost`, `McAfee WebAdvisor`, `Coupert`, `Honey`, `PDF Editor for Docs`) while keeping `uBlock Origin`, `Proton Pass`, `Dark Reader`, `Privacy Badger`, and `DuckDuckGo`.
+
+### RULE 6: SOFTWARE UPDATES
+1. Update all outdated `winget` and global `pip` packages silently (except `Wondershare.Filmora` which must stay pinned/blocked), then re-verify that `SUPERAntiSpyware` and `GarminExpress` did not re-add themselves to `HKCU\...\Run` startup.

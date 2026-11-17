@@ -1,0 +1,64 @@
+# MASTER PROMPT FOR GAMING, LAB (GNS3) & DESKTOP PC OPTIMIZATION + PRIVACY/SECURITY
+# Copy and paste everything inside the block below into Antigravity on your Gaming PC.
+
+================================================================================
+COPY EVERYTHING BELOW THIS LINE:
+================================================================================
+
+I want you to optimize, clean up, and harden this Windows 11 **Gaming & Lab Computer** in ONE streamlined pass without breaking any of my games, anti-cheat drivers, GNS3 networking labs, or daily workflows.
+
+**IMPORTANT CONTEXT:** Unlike my travel laptop, this is my **Gaming & Lab PC**. It is NOT meant to be a fully locked-down travel box—compatibility with Steam/games, kernel anti-cheats, GNS3/VMs, and performance is priority #1!
+
+Follow these exact rules:
+
+### RULE 1: SAFETY, BASELINE & ROLLBACK FIRST
+1. Before changing anything, create a System Restore Point and generate a `Rollback_Gaming_PC_Settings.ps1` script on my Desktop.
+2. Bundle all Administrator commands into a SINGLE self-elevating PowerShell script (`Start-Process powershell.exe -Verb RunAs ...`) so I only click "Yes" on one UAC prompt.
+3. Never delete my personal files, game saves, or VM images without listing large files (>1 GB) and asking me first.
+
+### RULE 2: WHAT YOU MUST KEEP WORKING 100% (GAMING & LAB RULES)
+1. **KEEP All Games, Launchers & Anti-Cheats:**
+   - Do NOT uninstall Steam, Epic, Xbox App, Battle.net, Riot/Vanguard, EasyAntiCheat, BattlEye, Roblox, Minecraft, or any installed games.
+   - Keep `XboxIdentityProvider`, `GamingServices`, `GameBar`, and `GameInput` services intact.
+   - Do NOT enable aggressive kernel/HVCI or Defender Block rules that break game anti-cheats or reduce gaming FPS.
+2. **KEEP GNS3, VirtualBox, VMware, QEMU, Dynamips, VPCS & Wireshark/Npcap:**
+   - I actively run **GNS3** and networking labs on this computer.
+   - Keep GNS3, `GNS3 server`, `uBridge`, `Dynamips`, `VPCS`, `Qemu`, `Wireshark`, `Npcap`, and virtual network adapters (`VirtualBox Host-Only`, `VMware`, `Loopback`, `WSL`) 100% functional!
+   - For Firewall rules on GNS3/lab tools: Keep them allowed on **`Private` (Home LAN) and `Localhost`** so my labs and VMs talk to each other freely, and only block unsolicited inbound traffic on the `Public` profile.
+3. **Startup Optimization (Gaming Performance):**
+   - Disable unnecessary auto-startup apps so I have maximum free RAM and CPU for gaming and GNS3 VMs (game launchers like Steam/Epic/Discord can be set to launch only when I click them, unless I tell you otherwise).
+   - Set heavy background database services (like `MySQL` or `SQL Server`, if installed) to `Manual` so they don't eat RAM while gaming.
+
+### RULE 3: STORAGE & SSD OPTIMIZATION
+1. Clean 100% safe caches: `%LOCALAPPDATA%\npm-cache`, `%USERPROFILE%\.cache`, `%USERPROFILE%\.nuget\packages`, `%LOCALAPPDATA%\Temp`, and check for leftover Windows upgrade staging folders (`C:\ESD`, `C:\$GetCurrent`, `C:\Windows.old`).
+2. Never touch `C:\ProgramData\Microsoft\Windows\Containers` or active game/shader caches unless asked.
+3. Run `Optimize-Volume -DriveLetter C -ReTrim` (and on any secondary NVMe/SSD game drives) to keep SSD load times fast.
+
+### RULE 4: WONDERSHARE FILMORA & SUPERANTISPYWARE (IF INSTALLED ON THIS PC)
+1. **If Wondershare Filmora is installed (Offline Isolation + Keep Login so both PCs stay logged in!):**
+   - Make sure I have logged into Filmora first, then close it.
+   - Preserve my logged-in session (`%APPDATA%\Wondershare\Wondershare Filmora`, `BSWsid.dll`, `FFWsRegister.dll`).
+   - DO NOT rename or delete `.dll` files in the main Filmora folder (like `WSQtAbSDK.dll`) or UI helpers (`CefViewWing.exe`, `WebBrowser.exe`).
+   - Stop & Disable `NativePushService`, rename standalone spyware/updater `.exe` files (`WsToastNotification.exe` on port 8090, `DataReporting.exe`, `CrashReporter.exe`, `BsSndRpt64.exe`, `BugSplatHD64.exe`, `FeedBackUnit.exe`, `Wondershare NativePush.exe`, `Wondershare Helper Compact.exe`, `Wondershare Filmora Update*.exe`) to `.disabled`, set `EnableAD=0`/`EnableUpdate=0`/`TipsEnable=0` in `Customization.xml`, lock `Wondershare NativePush` folder ACLs to `ReadAndExecute` for non-admins, block ALL Filmora/Wondershare `.exe` files Inbound & Outbound in Windows Firewall, and pin `Wondershare.Filmora` in `winget` (`winget pin add --id Wondershare.Filmora --blocking`).
+2. **If SUPERAntiSpyware is installed:**
+   - Update it to latest, configure `SAS_CURRENTUSER.DB3` for **Cookies-Only + Right-Click File Shredder** (`ScanUseKernelFileDirect = no`), remove from auto-startup, set `!SASCORE`, `SASKUTIL`, and `SASDIFSV` to `Manual` (`demand`), and strip `Everyone` write access from `C:\ProgramData\SUPERAntiSpyware.com\SUPERAntiSpyware\ToolLib`.
+
+### RULE 5: WINDOWS PRIVACY, ANTI-SPYWARE & NON-INTRUSIVE SECURITY HARDENING
+1. **Block Windows Recall (Screenshot Logging):** Set `DisableAIDataAnalysis = 1`, `TurnOffSavingSnapshots = 1`, and `AllowRecallEnablement = 0` in `HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI`.
+2. **Block Windows Typing & Inking Keystroke Harvesting:** Set `RestrictImplicitTextCollection = 1`, `RestrictImplicitInkCollection = 1`, `HarvestContacts = 0`, `AcceptedPrivacyPolicy = 0`, and `TIPC\Enabled = 0`.
+3. **Block Start Menu Bing Keystroke Streaming & Search History:** Set `DisableSearchBoxSuggestions = 1`, `BingSearchEnabled = 0`, and `IsDeviceSearchHistoryEnabled = 0`.
+4. **Block Voice Telemetry, Clipboard History/Cloud Sync & Ad ID:** Set `OnlineSpeechPrivacy\HasAccepted = 0`, `EnableClipboardHistory = 0`, `EnableCloudClipboard = 0`, `AdvertisingInfo\Enabled = 0`, `TailoredExperiencesWithDiagnosticDataEnabled = 0`, and disable `\SoftLanding\*` and `\GoogleUserPEH\*` scheduled tasks.
+5. **Keep App Launch & Recent Document Tracking ON** (`Start_TrackProgs = 1`, `Start_TrackDocs = 1`).
+6. **Keep `DiagTrack` and `DoSvc` Services Running**, set `AllowTelemetry = 1` (Basic), set Delivery Optimization `DODownloadMode = 0` (HTTP-Only, no P2P bandwidth hogging while gaming!), and set `MapsBroker` and Intel Telemetry (`dptftcs`) to `Manual`.
+7. **Network & OS Hardening (Gaming-Safe):**
+   - Stop & Disable Intel AMT (`LMS` on ports `623`/`16992`) and Windows Remote Assistance (`fAllowToGetHelp = 0`).
+   - Disable USB AutoRun/AutoPlay (`NoDriveTypeAutoRun = 255`, `NoAutorun = 1`, `DisableAutoplay = 1`).
+   - Disable LLMNR (`EnableMulticast = 0`) and WPAD (`AutoDetect = 0`, `WpadOverride = 1`), and enforce `LmCompatibilityLevel = 5` (NTLMv2) and `restrictanonymous = 1`.
+   - Enable Defender Network Protection (`1`) and PUA Protection (`1`), but do NOT enable Controlled Folder Access or Block-mode ASR rules if they could block Steam/game saves in `%USERPROFILE%\Documents\My Games` (use Audit Mode `2` only!).
+8. **Browser Hardening (Edge & Chrome):**
+   - Set `PasswordManagerEnabled = 0`, `BackgroundModeEnabled = 0`, and `StartupBoostEnabled = 0` (so browsers don't eat RAM in the background while gaming, and passwords stay in **Proton Pass**).
+   - After confirming my passwords are in Proton Pass, wipe any plaintext/DPAPI passwords stored in Edge/Chrome's local `Login Data` SQLite files.
+   - Remove coupon/bloatware extensions (`McAfee`, `Coupert`, `Honey`, `PDF Editor for Docs`) while keeping `uBlock Origin`, `Proton Pass`, `Dark Reader`, `Privacy Badger`, and `DuckDuckGo`.
+
+### RULE 6: SOFTWARE UPDATES
+1. Update all outdated `winget` and `pip` packages silently (except `Wondershare.Filmora` which stays pinned, and skip updating graphics drivers via winget so NVIDIA/AMD apps handle GPU drivers cleanly).

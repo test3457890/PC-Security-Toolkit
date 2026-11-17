@@ -1,0 +1,26 @@
+# ---------------------------------------------------------------------------
+# Personal data the toolkit creates while you use it. NEVER upload these:
+# they contain your PC name, user accounts, network settings, Wi-Fi name,
+# Family Plan PIN hash and security findings.
+# ---------------------------------------------------------------------------
+Backups/
+Logs/
+Reports/
+Config/
+
+# A personal security audit of one specific PC (PC name, username, findings)
+Docs/System Optimization Storage and Security Report.docx
+
+# ---------------------------------------------------------------------------
+# Third-party programs whose licenses don't allow re-sharing them.
+# Each person downloads these themselves - see Tools/README.md
+# ---------------------------------------------------------------------------
+Tools/HitmanPro*.exe
+Tools/adb/
+
+# Junk
+__pycache__/
+*.pyc
+Thumbs.db
+desktop.ini
+.DS_Store

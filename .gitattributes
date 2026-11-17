@@ -1,0 +1,10 @@
+# Keep the right line endings so the launchers work after cloning on any system
+*.bat      text eol=crlf
+*.ps1      text eol=crlf
+*.sh       text eol=lf
+*.command  text eol=lf
+*.py       text eol=lf
+*.html     text eol=lf
+*.exe      binary
+*.dll      binary
+*.docx     binary

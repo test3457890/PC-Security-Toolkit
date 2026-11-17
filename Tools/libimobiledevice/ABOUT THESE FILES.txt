@@ -1,0 +1,16 @@
+iPad / iPhone tools for the PC Security Toolkit
+================================================
+These are libimobiledevice: free, open-source tools that talk to iPads and iPhones
+over USB (https://libimobiledevice.org). They were downloaded on 2026-11-17 from the
+official MSYS2 package repository (https://repo.msys2.org/mingw/ucrt64/) and every
+package's signature was checked against the MSYS2 signing key before unpacking.
+
+Packages: libimobiledevice 1.3.0-18, ideviceinstaller 1.1.1-2, libimobiledevice-glue 1.3.2,
+libplist 2.7.0, libusbmuxd 2.1.1, openssl 4.1.0, libzip 1.12.1, zlib 1.4, xz 5.8.4,
+bzip2 1.0.8, zstd 1.5.7, libgcc 16.2.0, libwinpthread 14.0.0.
+Licenses: LGPL-2.1 / GPL-2.0 (libimobiledevice), Apache-2.0 (OpenSSL), BSD-style (others).
+
+Windows also needs the free "Apple Devices" app (Microsoft Store) for the USB driver.
+
+NOTE: These files are not code-signed. If Windows "Smart App Control" is on, Windows
+blocks them, and the toolkit falls back to basic USB detection and tells you so.

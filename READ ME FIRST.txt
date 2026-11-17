@@ -48,6 +48,12 @@ SAFETY
   The dashboard only works on this computer (127.0.0.1) and needs a new secret code
   every time it starts, so nobody on your network or the internet can get in through it.
 
+DISCLAIMER
+  No security tool can promise 100% protection. Nothing connected to the internet is
+  ever completely safe. This toolkit's job is to make an attacker work harder and take
+  longer, and to help you notice when something is wrong so you can act. Keep updates
+  on, use strong passwords with 2-step sign-in, and keep backups. Use at your own risk.
+
 FOLDERS
   Engine    the toolkit itself          Backups   recovery snapshots (one folder per PC)
   Profiles  ready-made setup scripts    Config    your theme and Family Plan settings

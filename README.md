@@ -6,6 +6,33 @@ and can undo every change it makes.
 
 Works on **Windows 10/11** (full features), **macOS** and **Linux** (scanning, reports, logs, checklists).
 
+> **No security tool can promise 100% protection.** Nothing connected to the internet is ever completely
+> safe, and this toolkit isn't either. Its job is to make an attacker work a lot harder, and to show you
+> what's going on so you can spot trouble early. [Read the full disclaimer.](#disclaimer)
+
+---
+
+## Why I made this
+
+Windows computers are a big target. Most of them run with settings that were chosen for convenience,
+not safety: old network features that leak password hashes on public Wi-Fi, remote-access services
+nobody uses, browser extensions that track everything, and protections like the firewall or Defender
+that can get switched off without anyone noticing. Attackers know those defaults well, and many
+break-ins don't need anything clever, just an unlocked door.
+
+Like a lot of people, I've watched the stream of hacks, scams and data leaks in the news and wanted a
+bit more peace of mind. Proper security tools are often expensive, confusing, or made for IT
+departments. I wanted something anyone could plug in, understand, and use:
+
+- **See it:** a plain-English list of what the computer is protected from, and what it isn't.
+- **Fix it:** close the common holes with one click, with a snapshot saved first so every change can be undone.
+- **Watch it:** a report and an activity log, so if something odd happens you can see what changed and when.
+- **Protect the family:** parental controls, because kids are online earlier than ever.
+
+It won't stop a determined expert with unlimited time, and it doesn't claim to. It's meant to take a
+computer from "easy target" to "not worth the trouble". Most attackers go after the easy ones. The aim
+is to slow them down long enough for you to notice what's happening and act.
+
 ---
 
 ## Is it safe? Can people get into my computer through this?
@@ -82,5 +109,20 @@ Docs/      guides and setup prompts
 
 ## Disclaimer
 
+**There is no such thing as 100% security.** Any computer connected to the internet can be attacked, and
+no tool, including this one, can guarantee that a computer won't be hacked, infected or scammed.
+
+What this toolkit does is **raise the bar**: it closes common weaknesses, makes an attacker work harder and
+take longer, and helps you notice when something is wrong so you can act. Treat it as one layer of
+protection, not a guarantee. Keep doing the basics too:
+
+- Install Windows, app and phone updates promptly.
+- Use strong, unique passwords and a password manager, and turn on two-step sign-in (2FA) wherever you can.
+- Keep backups of anything you can't afford to lose, on a drive that isn't always plugged in.
+- Be suspicious of unexpected links, attachments, pop-ups and "tech support" calls.
+- If you think a computer has been compromised, disconnect it from the internet and get help from a professional.
+
 This toolkit changes security and system settings. Every change saves a snapshot first and can be undone in
-Recovery Mode, but use it at your own risk. Review what a script does (the Script Builder shows the full script) before running it.
+Recovery Mode, but you use it at your own risk. Review what a script does (the Script Builder shows the full
+script) before running it. It is provided as-is, with no warranty of any kind, and the authors are not
+responsible for any damage, data loss or security incident.

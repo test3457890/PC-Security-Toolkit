@@ -47,7 +47,7 @@ The dashboard is a local web page intended for use on the computer where it runs
 - It uses port 8765, or a random free port if 8765 is busy, and it stops when you close the window.
 - Publishing source on GitHub does not itself expose a running local service. Do not forward or proxy the local port.
 - Anything that changes Windows settings needs you to click **Yes** on the Windows admin prompt,
-  and a recovery snapshot is saved first.
+  and the toolkit attempts a recovery snapshot first. Confirm that it was saved.
 
 Don't "port forward" it or put it on a web host. It's designed to run only on your own computer.
 
@@ -83,14 +83,14 @@ Mac and Linux need Python 3 (built into most Linux systems; on Mac run `xcode-se
 | ⚙️ Script Builder | Pick a profile (Travel, School, Work, Gaming, Friend PC audit) and run or download the hardening script |
 | 📱 iPad, iPhone & Android | USB scan of iPads/iPhones (passcode, iPadOS version, storage, backups, apps) and Android apps |
 | 👨‍👩‍👧 Family Plan | Parental controls: block sites in every app, SafeSearch, family DNS filter, blocked search words, sign-in hours, bedtime, parent PIN |
-| 🛟 Recovery Mode | Undo any change from a snapshot, back to Windows defaults, System Restore, file repair, network reset, Safe Mode |
+| 🛟 Recovery Mode | Preview and restore selected settings from snapshots, apply toolkit defaults, use System Restore and repair tools |
 | 📄 Reports & Logs | "What you're protected from" report, saved HTML reports, and a full activity log for troubleshooting |
 
 Plus 7 themes: Classic Midnight, Hacker Terminal, Cyberpunk Neon, Retro Amber, Deep Ocean, Daylight and High Contrast.
 
 ## Reports and logs
 
-- **Reports/** has saved security reports: what the computer is protected from, what it isn't, issues, ports,
+- **Reports/** has saved security reports: detected controls and gaps, issues, ports,
   startup apps and recent activity.
 - **Logs/<computer>/** has `toolkit <date>.log` with every action and error, plus a `run ...` / `recovery ...`
   log with the complete output of every script that changed something. Logs older than 30 days are deleted automatically.

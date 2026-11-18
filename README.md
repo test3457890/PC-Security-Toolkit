@@ -1,10 +1,12 @@
 # PC Security Toolkit
 
 A portable security, privacy and parental-controls dashboard that runs from a USB drive or any folder.
-It scans the computer, explains what it finds in plain English, fixes problems with one click,
-and can undo every change it makes.
+It scans the computer, explains findings in plain English, and offers selected maintenance and hardening actions.
+Windows recovery snapshots can restore many settings, but they are not a full system backup.
 
-Works on **Windows 10/11** (full features), **macOS** and **Linux** (scanning, reports, logs, checklists).
+Works on **Windows 10/11** (Windows actions and recovery), **macOS** and **Linux** (platform scans, reports, logs, and guidance).
+
+[Read the wiki](https://github.com/test3457890/PC-Security-Toolkit/wiki) for setup, features by platform, profiles, recovery, USB privacy limits, and troubleshooting.
 
 > **No security tool can promise 100% protection.** Nothing connected to the internet is ever completely
 > safe, and this toolkit isn't either. Its job is to make an attacker work a lot harder, and to show you
@@ -25,7 +27,7 @@ bit more peace of mind. Proper security tools are often expensive, confusing, or
 departments. I wanted something anyone could plug in, understand, and use:
 
 - **See it:** a plain-English list of what the computer is protected from, and what it isn't.
-- **Fix it:** close the common holes with one click, with a snapshot saved first so every change can be undone.
+- **Fix it:** review and apply selected actions. Confirm that a recovery snapshot was saved before changes and test the result.
 - **Watch it:** a report and an activity log, so if something odd happens you can see what changed and when.
 - **Protect the family:** parental controls, because kids are online earlier than ever.
 
@@ -37,14 +39,13 @@ is to slow them down long enough for you to notice what's happening and act.
 
 ## Is it safe? Can people get into my computer through this?
 
-No. The dashboard is a web page, but it is **only reachable from the computer it is running on**:
+The dashboard is a local web page intended for use on the computer where it runs:
 
 - The server listens on `127.0.0.1` (localhost), never on your network or the internet. Other devices,
   even on the same Wi-Fi, can't connect to it.
-- Every time it starts, it creates a new random 64-character secret. Every request must include that secret,
-  so other websites open in your browser can't control it either.
+- Every time it starts, it creates a new random session token required for API calls. This helps restrict requests, but it is not a guarantee against a compromised host.
 - It uses port 8765, or a random free port if 8765 is busy, and it stops when you close the window.
-- Putting the code on GitHub only shares the code. Nobody can reach anyone's computer through GitHub.
+- Publishing source on GitHub does not itself expose a running local service. Do not forward or proxy the local port.
 - Anything that changes Windows settings needs you to click **Yes** on the Windows admin prompt,
   and a recovery snapshot is saved first.
 
@@ -65,8 +66,7 @@ Don't "port forward" it or put it on a web host. It's designed to run only on yo
 | Mac | `START HERE Mac.command` (first time: right-click > Open) | Time Machine / macOS Recovery |
 | Linux | `bash "START HERE Linux.sh"` | Timeshift / recovery boot |
 
-If Windows shows "Windows protected your PC", click **More info > Run anyway**. That message appears for
-any program that isn't from a big publisher.
+If Windows displays a security warning, verify the source and inspect the scripts before deciding whether to run them. Do not disable Defender or Smart App Control to make optional tools work.
 
 Mac and Linux need Python 3 (built into most Linux systems; on Mac run `xcode-select --install`).
 
@@ -94,7 +94,7 @@ Plus 7 themes: Classic Midnight, Hacker Terminal, Cyberpunk Neon, Retro Amber, D
   startup apps and recent activity.
 - **Logs/<computer>/** has `toolkit <date>.log` with every action and error, plus a `run ...` / `recovery ...`
   log with the complete output of every script that changed something. Logs older than 30 days are deleted automatically.
-- **Backups/<computer>/** holds the recovery snapshots.
+- **Backups/<computer>/** holds settings snapshots. These are not copies of personal files or full disk images.
 
 These folders contain personal information about the computer, so they're excluded from Git (`.gitignore`).
 
@@ -122,7 +122,6 @@ protection, not a guarantee. Keep doing the basics too:
 - Be suspicious of unexpected links, attachments, pop-ups and "tech support" calls.
 - If you think a computer has been compromised, disconnect it from the internet and get help from a professional.
 
-This toolkit changes security and system settings. Every change saves a snapshot first and can be undone in
-Recovery Mode, but you use it at your own risk. Review what a script does (the Script Builder shows the full
+This toolkit changes security and system settings. It attempts to save a snapshot before changes, but you must confirm it succeeded. Recovery covers selected settings and may not undo every effect. Back up important files separately and use it at your own risk. Review what a script does (the Script Builder shows the full
 script) before running it. It is provided as-is, with no warranty of any kind, and the authors are not
 responsible for any damage, data loss or security incident.

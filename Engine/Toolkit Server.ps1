@@ -6,6 +6,9 @@
 # ==============================================================================
 
 $ErrorActionPreference = "SilentlyContinue"
+. (Join-Path $PSScriptRoot 'Guest Policy.ps1')
+$script:scanConsented = $false
+$script:guestMode = $true
 # Use Windows PowerShell's own module folders even if started from a PowerShell 7 window.
 if ($PSVersionTable.PSEdition -ne 'Core') {
     $env:PSModulePath = @("$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowerShell\Modules", "$env:ProgramFiles\WindowsPowerShell\Modules", "$PSHOME\Modules") -join ';'
@@ -16,9 +19,8 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
 if ($ExecutionContext.SessionState.LanguageMode -ne 'FullLanguage') {
     Write-Host ''
     Write-Host '  Windows is running the toolkit in restricted mode, so it cannot start.' -ForegroundColor Yellow
-    Write-Host '  This happens when the files came from an internet ZIP download.' -ForegroundColor Yellow
-    Write-Host '  Fix: delete this folder, right-click the downloaded ZIP > Properties >' -ForegroundColor Gray
-    Write-Host '       tick "Unblock" > OK, then extract it again. (Or download it with "git clone".)' -ForegroundColor Gray
+    Write-Host '  Application control or administrator policy may require this mode.' -ForegroundColor Yellow
+    Write-Host '  Respect that restriction. Ask the device administrator for an approved option.' -ForegroundColor Gray
     Write-Host ''
     Read-Host 'Press Enter to close' | Out-Null
     exit
@@ -40,9 +42,9 @@ $script:familyUnlocked = $false
 # ------------------------------------------------------------------------------
 # Activity log: Logs\<PC name>\toolkit <date>.log (kept 30 days)
 # ------------------------------------------------------------------------------
-New-Item -ItemType Directory -Path $logDir -Force | Out-Null
-Get-ChildItem -LiteralPath $logDir -Filter '*.log' | Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-30) } | Remove-Item -Force
+# Guest Mode neither creates nor prunes toolkit logs.
 function Write-Log([string]$Level, [string]$Message) {
+    if ($script:guestMode) { return }
     $file = Join-Path $logDir ("toolkit {0}.log" -f (Get-Date -Format 'yyyy-MM-dd'))
     $line = "{0} [{1}] {2}" -f (Get-Date -Format 'HH:mm:ss'), $Level, ($Message -replace '[\r\n]+', ' | ')
     try { Add-Content -LiteralPath $file -Value $line -Encoding UTF8 } catch {}
@@ -55,6 +57,7 @@ function Write-Log([string]$Level, [string]$Message) {
 function Start-Listener([int]$p) {
     $l = New-Object System.Net.HttpListener
     $l.Prefixes.Add("http://127.0.0.1:$p/")
+    $l.TimeoutManager.EntityBody = [TimeSpan]::FromSeconds(10)
     try { $l.Start(); return $l } catch { return $null }
 }
 $listener = Start-Listener $port
@@ -76,13 +79,13 @@ if (-not $listener) {
     Write-Host "Port 8765 was busy, so the toolkit is using port $port instead." -ForegroundColor Yellow
 }
 $prefix = "http://127.0.0.1:$port/"
-Write-Log 'INFO' "Toolkit started on $prefix by $env:USERNAME (PowerShell $($PSVersionTable.PSVersion), $((Get-CimInstance Win32_OperatingSystem).Caption))"
+Write-Log 'INFO' 'Guest toolkit started.'
 
 Write-Host "==================================================================" -ForegroundColor Cyan
-Write-Host "  PC Security Toolkit v3.1 is running" -ForegroundColor Green
+Write-Host '  PC Security Toolkit: scan-only safety preview' -ForegroundColor Green
 Write-Host "  URL: $prefix" -ForegroundColor White
 Write-Host "  Keep this window open while you use the dashboard." -ForegroundColor Gray
-Write-Host "  If anything goes wrong, double-click 'RECOVERY MODE Windows.bat'." -ForegroundColor Gray
+Write-Host '  Changes and external tools are unavailable in this preview.' -ForegroundColor Gray
 Write-Host "==================================================================" -ForegroundColor Cyan
 
 Start-Process $prefix
@@ -100,17 +103,18 @@ function Send-Json($res, $obj, [int]$status = 200) {
     $res.OutputStream.Write($bytes, 0, $bytes.Length)
     $res.Close()
     if ($obj -is [hashtable] -and $obj.ContainsKey('message') -and $script:currentPath -ne '/api/client-log') {
-        Write-Log $(if ($obj.ok) { 'INFO' } else { 'WARN' }) "$($script:currentPath): $($obj.message)"
+    Write-Log $(if ($obj.ok) { 'INFO' } else { 'WARN' }) "$($script:currentPath): $($obj.message)"
     }
 }
 
 function Read-Body($req) {
+    if ($req.ContentLength64 -lt 0 -or $req.ContentLength64 -gt 4096) { throw 'A known request size of at most 4096 bytes is required.' }
+    $reader = New-Object System.IO.StreamReader($req.InputStream, [System.Text.Encoding]::UTF8)
     try {
-        $reader = New-Object System.IO.StreamReader($req.InputStream, [System.Text.Encoding]::UTF8)
         $text = $reader.ReadToEnd()
         if (-not $text) { return [pscustomobject]@{} }
-        return ($text | ConvertFrom-Json)
-    } catch { return [pscustomobject]@{} }
+        return ($text | ConvertFrom-Json -ErrorAction Stop)
+    } finally { $reader.Dispose() }
 }
 
 function Quote-PS([string]$s) { return "'" + ($s -replace "'", "''") + "'" }
@@ -650,7 +654,7 @@ try {
             if ($hostHeader -notin @("127.0.0.1:$port", "localhost:$port")) { $res.StatusCode = 403; $res.Close(); continue }
 
             if ($path -eq "/" -or $path -eq "/index.html") {
-                $htmlFile = Join-Path $engineDir "Live Toolkit.html"
+                $htmlFile = Join-Path $engineDir 'Guest Dashboard.html'
                 $content = (Get-Content -LiteralPath $htmlFile -Raw -Encoding UTF8).Replace('%%TOOLKIT-TOKEN%%', $token)
                 $bytes = [System.Text.Encoding]::UTF8.GetBytes($content)
                 $res.ContentType = "text/html; charset=utf-8"
@@ -665,10 +669,27 @@ try {
             if (-not $path.StartsWith('/api/')) { $res.StatusCode = 404; $res.Close(); continue }
             if ($req.Headers['X-Toolkit-Token'] -ne $token) { Send-Json $res @{ ok = $false; message = 'Missing or wrong toolkit token. Reload the page.' } 403; continue }
 
+            # No API, including an old dashboard or hand-crafted client, can bypass Guest Mode.
+            $origin = $req.Headers['Origin']
+            if ($origin -and $origin -cne "http://127.0.0.1:$port") { Send-Json $res @{ ok = $false; code = 'origin_denied'; message = 'Origin denied.' } 403; continue }
+            if ($method -eq 'POST' -and -not $origin) { Send-Json $res @{ ok = $false; code = 'origin_required'; message = 'Same-origin browser request required.' } 403; continue }
+            $decision = Get-GuestRequestDecision -Path $path -Method $method -Consented $script:scanConsented
+            if (-not $decision.Allowed) { Send-Json $res @{ ok = $false; code = $decision.Code; message = $decision.Message } $decision.Status; continue }
+
             $body = $null
-            if ($method -eq 'POST') { $body = Read-Body $req }
+            if ($method -eq 'POST') {
+                if ($req.ContentLength64 -lt 0 -or $req.ContentLength64 -gt 4096 -or $req.Headers['Transfer-Encoding']) { Send-Json $res @{ ok = $false; message = 'Request size not supported.' } 413; continue }
+                if ($req.ContentType -notmatch '^application/json(?:;|$)') { Send-Json $res @{ ok = $false; message = 'JSON required.' } 415; continue }
+                try { $body = Read-Body $req } catch { Send-Json $res @{ ok = $false; message = 'Invalid JSON request.' } 400; continue }
+            }
 
             switch ($path) {
+                '/api/session' { Send-Json $res @{ mode = 'guest'; consented = $script:scanConsented; persistence = $false; modification = $false; usbModes = @{ portable = 'preview'; secureSession = 'planned'; disposableWorkspace = 'planned' } } }
+                '/api/consent' {
+                    if ($body.authorized -isnot [bool] -or $body.authorized -ne $true) { Send-Json $res @{ ok = $false; message = 'Permission to inspect this device is required.' } 400; break }
+                    $script:scanConsented = $true
+                    Send-Json $res @{ ok = $true; message = 'Read-only scan authorized for this toolkit session.' }
+                }
                 '/api/scan' {
                     $sw = [Diagnostics.Stopwatch]::StartNew()
                     $scan = Invoke-FastScan
@@ -705,8 +726,7 @@ try {
                         Write-JsonFile $settingsFile @{ theme = $theme }
                         Send-Json $res @{ ok = $true }
                     } else {
-                        $s = Read-JsonFile $settingsFile
-                        Send-Json $res @{ theme = $(if ($s -and $s.theme) { $s.theme } else { 'midnight' }); platform = 'Windows'; computer = $env:COMPUTERNAME }
+                        Send-Json $res @{ theme = 'midnight'; platform = 'Windows'; mode = 'guest'; persistence = $false; modification = $false }
                     }
                 }
 

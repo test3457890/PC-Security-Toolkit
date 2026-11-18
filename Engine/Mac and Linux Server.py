@@ -2,15 +2,15 @@
 """
 Mac and Linux Server.py - PC Security Toolkit v3.1 local server for macOS and Linux.
 
-Binds ONLY to 127.0.0.1 (nothing on your network can reach it). Uses port 8765, or a
-random free port if 8765 is busy. Every API call needs the secret token that is written
-into the page at start-up, so other websites in your browser can't drive the toolkit.
+Binds to loopback with per-run API tokens and a scan-only request policy.
+Uses port 8765, or an available ephemeral port. Loopback does not protect against
+a compromised host or privileged browser extensions.
 
 macOS checks: FileVault, Firewall + Stealth Mode, Gatekeeper, SIP, LaunchAgents.
 Linux checks: firewall (ufw/firewalld/nftables), LUKS disk encryption, Secure Boot,
 SSH server, automatic security updates, autostart apps.
-Both: listening ports, outbound connections, big downloads, risky browser extensions,
-iPad / iPhone over USB, activity log, saved reports.
+Both: listening ports, outbound connections, big downloads and extension metadata.
+Legacy modification/export helpers remain in source but are denied by Guest Mode.
 """
 
 import datetime
@@ -40,6 +40,21 @@ LOG_DIR = os.path.join(ROOT_DIR, "Logs", HOST)
 TOKEN = secrets.token_hex(32)
 PORT = 8765
 ALLOWED_HOSTS = set()
+SCAN_CONSENTED = False
+GUEST_ROUTES = {
+    "/api/settings": "GET", "/api/session": "GET", "/api/consent": "POST",
+    "/api/scan": "GET", "/api/shutdown": "POST",
+}
+
+
+def guest_decision(path, method, consented):
+    if path not in GUEST_ROUTES:
+        return 403, "guest_read_only"
+    if method != GUEST_ROUTES[path]:
+        return 405, "method_not_allowed"
+    if path == "/api/scan" and not consented:
+        return 409, "consent_required"
+    return 200, "allowed"
 
 KNOWN_RISKY = {
     "amnbcmdbanbkjhnfoeceemmmdiepnbpp": "Honey (Coupon/Cookie Tracker)",
@@ -54,24 +69,13 @@ KNOWN_RISKY = {
 # Activity log: Logs/<computer>/toolkit <date>.log (kept 30 days)
 # ---------------------------------------------------------------------------
 def write_log(level, message):
-    try:
-        os.makedirs(LOG_DIR, exist_ok=True)
-        now = datetime.datetime.now()
-        path = os.path.join(LOG_DIR, f"toolkit {now:%Y-%m-%d}.log")
-        with open(path, "a", encoding="utf-8") as f:
-            f.write(f"{now:%H:%M:%S} [{level}] {' | '.join(str(message).splitlines())}\n")
-    except Exception:
-        pass
+    # Guest Mode never persists toolkit logs.
+    return
 
 
 def prune_logs():
-    cutoff = datetime.datetime.now().timestamp() - 30 * 86400
-    for f in glob.glob(os.path.join(LOG_DIR, "*.log")):
-        try:
-            if os.path.getmtime(f) < cutoff:
-                os.remove(f)
-        except Exception:
-            pass
+    # Existing logs belong to prior sessions; do not delete them.
+    return
 
 
 def run_cmd(cmd, timeout=6):
@@ -382,6 +386,19 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if self.path.startswith("/api/") and self.headers.get("X-Toolkit-Token") != TOKEN:
             self.send_json({"ok": False, "message": "Missing or wrong toolkit token. Reload the page."}, 403)
             return False
+        origin = self.headers.get("Origin")
+        expected_origin = f"http://127.0.0.1:{self.server.server_address[1]}"
+        if origin and origin != expected_origin:
+            self.send_json({"ok": False, "code": "origin_denied", "message": "Origin denied."}, 403)
+            return False
+        if self.command == "POST" and not origin:
+            self.send_json({"ok": False, "code": "origin_required", "message": "Same-origin browser request required."}, 403)
+            return False
+        if self.path.startswith("/api/"):
+            status, code = guest_decision(self.path, self.command, SCAN_CONSENTED)
+            if status != 200:
+                self.send_json({"ok": False, "code": code, "message": "Scan only. Confirm permission before scanning. Changes and persistent data are unavailable in this preview."}, status)
+                return False
         return True
 
     def do_GET(self):
@@ -389,7 +406,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
         try:
             if self.path in ("/", "/index.html"):
-                with open(os.path.join(ENGINE_DIR, "Live Toolkit.html"), "r", encoding="utf-8") as f:
+                with open(os.path.join(ENGINE_DIR, "Guest Dashboard.html"), "r", encoding="utf-8") as f:
                     data = f.read().replace("%%TOOLKIT-TOKEN%%", TOKEN).encode("utf-8")
                 self.send_response(200)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -403,7 +420,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 write_log("INFO", f"Scan finished: score {scan['score']}/100, {len(scan['findings'])} issue(s): " + "; ".join(f"[{f['severity']}] {f['title']}" for f in scan["findings"]))
                 self.send_json(scan)
             elif self.path == "/api/settings":
-                self.send_json({"theme": read_settings().get("theme", "midnight"), "platform": PLATFORM, "computer": HOST})
+                self.send_json({"theme": "midnight", "platform": PLATFORM, "mode": "guest", "persistence": False, "modification": False})
+            elif self.path == "/api/session":
+                self.send_json({"mode": "guest", "consented": SCAN_CONSENTED, "persistence": False, "modification": False,
+                                "usbModes": {"portable": "preview", "secureSession": "planned", "disposableWorkspace": "planned"}})
             elif self.path == "/api/mobile-scan":
                 self.send_json(invoke_mobile_scan())
             elif self.path == "/api/logs":
@@ -421,15 +441,35 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_json({"ok": False, "message": f"Server error: {e}"}, 500)
 
     def do_POST(self):
+        global SCAN_CONSENTED
         if not self.guard():
             return
-        length = int(self.headers.get("Content-Length", 0) or 0)
         try:
+            length = int(self.headers.get("Content-Length", "-1"))
+        except ValueError:
+            length = -1
+        if length < 0 or length > 4096 or self.headers.get("Transfer-Encoding"):
+            self.send_json({"ok": False, "message": "Known request size of at most 4096 bytes required."}, 413)
+            return
+        if self.headers.get_content_type() != "application/json":
+            self.send_json({"ok": False, "message": "JSON required."}, 415)
+            return
+        try:
+            self.connection.settimeout(10)
             body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+            if not isinstance(body, dict):
+                raise ValueError("JSON object required")
         except Exception:
-            body = {}
+            self.send_json({"ok": False, "message": "Invalid JSON request."}, 400)
+            return
         try:
-            if self.path == "/api/settings":
+            if self.path == "/api/consent":
+                if body.get("authorized") is not True:
+                    self.send_json({"ok": False, "message": "Permission to inspect this device is required."}, 400)
+                    return
+                SCAN_CONSENTED = True
+                self.send_json({"ok": True, "message": "Read-only scan authorized for this toolkit session."})
+            elif self.path == "/api/settings":
                 theme = str(body.get("theme", "midnight"))
                 if not re.fullmatch(r"[a-z]{2,20}", theme):
                     theme = "midnight"

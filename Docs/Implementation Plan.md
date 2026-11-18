@@ -1,7 +1,7 @@
 # Implementation plan
 
 Date: November 17, 2026. Baseline: `24944a89db2c5ed185154ee49850ca535b183b10`.
-Status: proposed for owner review. Runtime implementation has not started.
+Status: implementation order approved by the owner. The first scan-only boundary is implemented on a separate review branch; see Preview Validation.md. Remaining runtime work is open.
 
 ## Proposed pull request order
 
@@ -92,3 +92,11 @@ reconcile incomplete journals before another action. Never erase audit logs.
 Defaults remain a distinct second USB, read-only unprepared hosts, visible opt-in
 on owned devices, no deletion/stealth, and no automatically enabled Sandbox feature.
 These open decisions do not block documentation, inventory or safe test scaffolding.
+
+## Owner update: three distinct drives
+
+The owner requested a third physical drive for a disposable workspace. See
+[Three USB Modes](Three%20USB%20Modes.md) for the updated specification. This separate
+live-OS proposal requires authorized external boot and is not a zero-trace Windows
+insert feature. The optional Windows Sandbox experience remains a weaker, separate
+Windows-hosted option; it is not the third drive or a replacement for live boot.

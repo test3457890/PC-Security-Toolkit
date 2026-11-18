@@ -4,7 +4,6 @@ echo "================================================================"
 echo "  PC Security Toolkit (macOS)"
 echo "  Starting the local server at http://127.0.0.1:8765/ ..."
 echo "================================================================"
-chmod +x "$0" 2>/dev/null
 if command -v python3 >/dev/null 2>&1; then
     python3 "Engine/Mac and Linux Server.py"
 else

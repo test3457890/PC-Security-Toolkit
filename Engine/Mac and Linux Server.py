@@ -14,6 +14,7 @@ Legacy modification/export helpers remain in source but are denied by Guest Mode
 """
 
 import datetime
+import argparse
 import glob
 import http.server
 import json
@@ -517,10 +518,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_json({"ok": False, "message": f"Server error: {e}"}, 500)
 
 
-def open_server():
+def open_server(preferred_port=8765):
     """Port 8765, or a random free port if it's busy. Always 127.0.0.1 only."""
     socketserver.TCPServer.allow_reuse_address = True
-    for port in [8765, 0, 0, 0]:
+    for port in [preferred_port, 0, 0, 0]:
         try:
             return socketserver.ThreadingTCPServer(("127.0.0.1", port), Handler)
         except OSError:
@@ -529,8 +530,16 @@ def open_server():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="PC Security Toolkit scan-only preview")
+    parser.add_argument("--no-browser", action="store_true", help="Print the URL without opening a browser")
+    parser.add_argument("--port", type=int, default=8765, help="Preferred loopback port; 0 selects an available port")
+    args = parser.parse_args()
+    if not 0 <= args.port <= 65535:
+        parser.error("port must be between 0 and 65535")
+    if not os.path.isfile(os.path.join(ENGINE_DIR, "Guest Dashboard.html")):
+        raise SystemExit("Incomplete toolkit: missing Guest Dashboard.html. Extract the complete package again.")
     prune_logs()
-    httpd = open_server()
+    httpd = open_server(args.port)
     PORT = httpd.server_address[1]
     ALLOWED_HOSTS.update({f"127.0.0.1:{PORT}", f"localhost:{PORT}"})
     url = f"http://127.0.0.1:{PORT}/"
@@ -538,7 +547,8 @@ if __name__ == "__main__":
     print(f"PC Security Toolkit ({PLATFORM}) running at {url}")
     print("Keep this window open while you use the dashboard. Press Ctrl+C to stop.")
     try:
-        webbrowser.open(url)
+        if not args.no_browser:
+            webbrowser.open(url)
     except Exception:
         pass
     try:

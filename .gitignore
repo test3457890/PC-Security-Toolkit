@@ -21,6 +21,7 @@ Tools/adb/
 # Junk
 __pycache__/
 *.pyc
+Dist/
 Thumbs.db
 desktop.ini
 .DS_Store

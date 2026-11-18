@@ -1,5 +1,9 @@
 PC SECURITY TOOLKIT: SCAN-ONLY SAFETY PREVIEW
 
+Extract the complete ZIP before opening START HERE. Keep all Engine files together.
+See Docs/Download and Run.md for the complete preview download and checksum steps.
+No formatting or USB imaging is required for this scan-only folder.
+
 Open START HERE for your OS, then confirm permission and choose Scan this PC.
 Windows basic checks use current-user permissions. Do not elevate Guest Mode.
 macOS/Linux require Python 3. Respect school/employer application controls.

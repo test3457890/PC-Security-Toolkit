@@ -25,17 +25,27 @@ dashboard JavaScript syntax. It never runs a real scan or OS-changing command.
 
 Windows checks parse all PowerShell files and execute only the pure Guest Policy
 functions with route/method/consent fixtures. Integration placement is checked without
-starting the Windows engine. CI runs fixture checks on Windows/macOS/Linux and the
-PowerShell checks on Windows. CI results must be inspected, not assumed from workflow
-presence. Elevated VM evidence remains unavailable.
+starting the Windows engine in that policy test. A separate package integration test
+builds and extracts the curated ZIP into a path with spaces and a non-English character,
+starts the actual platform server without opening a browser, checks denied mutations
+and pre-scan consent, then shuts it down. It verifies that toolkit file bytes and the
+file list are unchanged. It never calls the real OS scan or an elevated action.
+
+Package tests verify file completeness, ZIP integrity, every manifest hash, reproducible
+bytes, omission of legacy launchers/binaries, missing-file failure before startup, and
+refusal to overwrite an existing build. CI runs these on Windows/macOS/Linux. A package
+artifact is uploaded only after all platform suites and PowerShell checks pass. Inspect
+the matching CI run rather than assuming success from workflow presence. Standard-user
+Windows runtime, actual scans, physical media and elevated VM evidence remain unavailable.
 
 ## Remaining release blockers
 
 1. Legacy standalone profiles, downloaded/generated legacy scripts and Recovery
    entry points still have the verified snapshot, conflict and coverage gaps. Their
    source is retained; they must not be treated as part of the safe Guest boundary.
-2. Windows actual runtime/permissions/HTTP behavior needs dedicated-VM verification.
-   Pester/parser/fixture checks cannot prove the scan has no unintended OS effects.
+2. Windows standard-user permissions and actual scan behavior need dedicated-VM
+   verification. Hosted-runner startup/API checks do not prove all host configurations
+   or scan providers have no unintended OS effects.
 3. Legacy findings still need explicit availability states and evidence review. The
    new UI discloses this and does not display the custom score as a security grade.
 4. No temporary OS-change action registry or verified transaction engine is shipped

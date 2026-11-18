@@ -6,6 +6,11 @@ This is not a released v3.2 build or a validated hardening/recovery product.
 
 ## Start a read-only scan
 
+[Download the complete preview ZIP](https://github.com/test3457890/PC-Security-Toolkit/archive/refs/heads/fix/portable-guest-boundary.zip).
+The default main-branch ZIP still contains v3.1 until owner-reviewed merge. For a
+curated single-folder package with checksums and without legacy launchers or bundled
+binaries, use the latest successful CI artifact. See [Download and Run](Docs/Download%20and%20Run.md).
+
 Download or clone this branch, extract it, and open the launcher for your OS:
 
 | System | Launcher | Requirement |
@@ -81,6 +86,8 @@ through port forwarding, a proxy or public hosting.
 No Windows VM restoration, physical USB-loss or elevated-action test evidence is
 available for this preview. The new Windows policy can be parsed and fixture-tested
 without changing security settings. CI checks are not a substitute for VM evidence.
+The package suite also tests actual platform server startup/API shutdown from an
+extracted ZIP, with spaces/non-English paths, without invoking host security scans.
 
 ## Privacy and dependencies
 
@@ -111,6 +118,9 @@ Run `python -m unittest discover -s Tests -p "test_*.py" -v` with Python 3 and N
 available. On Windows, run `powershell -NoProfile -File "Tests/Guest Policy Tests.ps1"`.
 These tests use fixture scans/pure request policies and do not modify OS controls.
 Runtime changes need the separately documented disposable-VM evidence before release.
+Build the curated source preview with `python "Build Preview.py"`. The ZIP and its
+checksum are written to Dist. Existing outputs are never overwritten; use a new
+`--output` folder for another build. No raw drives are opened, formatted or imaged.
 
 Keep security updates, endpoint protection, backups and disk encryption in place.
 The toolkit is a learning and assessment aid, not a replacement for those controls.

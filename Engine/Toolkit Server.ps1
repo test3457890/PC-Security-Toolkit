@@ -5,8 +5,15 @@
 # so other websites open in your browser cannot drive the toolkit.
 # ==============================================================================
 
-$ErrorActionPreference = "SilentlyContinue"
+param([switch]$NoBrowser, [ValidateRange(1,65535)][int]$Port = 8765)
+
+# A missing safety policy must stop startup before any listener is created.
+$ErrorActionPreference = 'Stop'
+foreach ($required in @('Guest Policy.ps1','Guest Dashboard.html')) {
+    if (-not (Test-Path -LiteralPath (Join-Path $PSScriptRoot $required) -PathType Leaf)) { throw "Incomplete toolkit: missing $required. Extract the complete package again." }
+}
 . (Join-Path $PSScriptRoot 'Guest Policy.ps1')
+$ErrorActionPreference = 'SilentlyContinue'
 $script:scanConsented = $false
 $script:guestMode = $true
 # Use Windows PowerShell's own module folders even if started from a PowerShell 7 window.
@@ -28,7 +35,6 @@ if ($ExecutionContext.SessionState.LanguageMode -ne 'FullLanguage') {
 
 $engineDir   = Split-Path -Parent $MyInvocation.MyCommand.Path
 $rootDir     = Split-Path -Parent $engineDir
-$port        = 8765
 $recovery    = Join-Path $engineDir 'Recovery.ps1'
 $logDir      = Join-Path $rootDir "Logs\$env:COMPUTERNAME"
 $configDir   = Join-Path $rootDir 'Config'
@@ -64,9 +70,9 @@ $listener = Start-Listener $port
 if (-not $listener) {
     try {
         $page = Invoke-WebRequest -Uri "http://127.0.0.1:$port/" -UseBasicParsing -TimeoutSec 3
-        if ($page.Content -match 'toolkit-token') {
+        if ($page.Content -match 'PC Security Toolkit \| Scan only') {
             Write-Host "The toolkit is already running - opening it in your browser." -ForegroundColor Green
-            Start-Process "http://127.0.0.1:$port/"
+            if (-not $NoBrowser) { Start-Process "http://127.0.0.1:$port/" }
             exit
         }
     } catch {}
@@ -88,7 +94,7 @@ Write-Host "  Keep this window open while you use the dashboard." -ForegroundCol
 Write-Host '  Changes and external tools are unavailable in this preview.' -ForegroundColor Gray
 Write-Host "==================================================================" -ForegroundColor Cyan
 
-Start-Process $prefix
+if (-not $NoBrowser) { Start-Process $prefix }
 
 # ------------------------------------------------------------------------------
 # Helpers

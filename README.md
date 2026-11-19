@@ -2,11 +2,13 @@
 
 A portable security, privacy and parental-controls dashboard that runs from a USB drive or any folder.
 It scans the computer, explains findings in plain English, and offers selected maintenance and hardening actions.
-Windows recovery snapshots can restore many settings, but they are not a full system backup.
+Windows recovery snapshots cover selected settings. See [Recovery and backups](https://github.com/test3457890/PC-Security-Toolkit/wiki/Recovery-and-Backups) for what a snapshot can restore.
 
 Works on **Windows 10/11** (Windows actions and recovery), **macOS** and **Linux** (platform scans, reports, logs, and guidance).
 
 [Read the wiki](https://github.com/test3457890/PC-Security-Toolkit/wiki) for setup, features by platform, profiles, recovery, USB privacy limits, and troubleshooting.
+
+If you use a USB drive, keep the whole folder together and start the launcher manually. The host can retain normal operating-system traces, and applied Windows settings persist until you restore them. See [USB use and privacy](https://github.com/test3457890/PC-Security-Toolkit/wiki/USB-Use-and-Privacy).
 
 > **No security tool can promise 100% protection.** Nothing connected to the internet is ever completely
 > safe, and this toolkit isn't either. Its job is to make an attacker work a lot harder, and to show you
@@ -31,9 +33,7 @@ departments. I wanted something anyone could plug in, understand, and use:
 - **Watch it:** a report and an activity log, so if something odd happens you can see what changed and when.
 - **Protect the family:** parental controls, because kids are online earlier than ever.
 
-It won't stop a determined expert with unlimited time, and it doesn't claim to. It's meant to take a
-computer from "easy target" to "not worth the trouble". Most attackers go after the easy ones. The aim
-is to slow them down long enough for you to notice what's happening and act.
+Use the findings as a starting point for reviewing the device. Available checks and actions depend on the operating system, installed tools, and permissions.
 
 ---
 
@@ -77,12 +77,12 @@ Mac and Linux need Python 3 (built into most Linux systems; on Mac run `xcode-se
 | Tab | What it does |
 |---|---|
 | 📊 Overview & Advisor | Security score, issues found, offline Q&A advisor (uses a local Ollama AI if you have one) |
-| 💾 Storage | Cache sizes, old Windows upgrade files, big downloads, one-click safe cleanup |
+| 💾 Storage | Cache sizes, old Windows upgrade files, big downloads, reviewable cleanup actions |
 | 🛡️ Backdoors, Ports & Extensions | Listening ports, programs online, startup apps, login-screen backdoor checks, tracking extensions |
 | 🔒 Privacy & Network | Live status of Defender, firewall, UAC, BitLocker, Secure Boot, Wi-Fi spoofing protections and privacy settings |
 | ⚙️ Script Builder | Pick a profile (Travel, School, Work, Gaming, Friend PC audit) and run or download the hardening script |
 | 📱 iPad, iPhone & Android | USB scan of iPads/iPhones (passcode, iPadOS version, storage, backups, apps) and Android apps |
-| 👨‍👩‍👧 Family Plan | Parental controls: block sites in every app, SafeSearch, family DNS filter, blocked search words, sign-in hours, bedtime, parent PIN |
+| 👨‍👩‍👧 Family Plan | Parental controls: Windows site and DNS filtering options, SafeSearch, sign-in schedules, and a parent PIN |
 | 🛟 Recovery Mode | Preview and restore selected settings from snapshots, apply toolkit defaults, use System Restore and repair tools |
 | 📄 Reports & Logs | "What you're protected from" report, saved HTML reports, and a full activity log for troubleshooting |
 

@@ -1,0 +1,356 @@
+{
+  "schema_version": 1,
+  "inventory_type": "local byte inventory, not a verified SBOM",
+  "review_date": "2026-11-17",
+  "baseline_commit": "24944a89db2c5ed185154ee49850ca535b183b10",
+  "file_count": 34,
+  "limitations": [
+    "SHA-256 values identify checked-in bytes, not upstream authenticity or safety.",
+    "PE certificate-table presence is not a signature trust validation and does not assess catalog signing.",
+    "Claimed package versions and aggregate licenses require upstream package/signature/source evidence.",
+    "No bundled executable was run. No vulnerability or malware scan was performed.",
+    "Distribution remains pending per-component license/provenance review."
+  ],
+  "files": [
+    {
+      "path": "Tools/libimobiledevice/idevice_id.exe",
+      "size_bytes": 50903,
+      "sha256": "00770331a66c3c993322c95781066feb92dfa1d9060d62d05609e3560883416b",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/idevicebackup.exe",
+      "size_bytes": 79427,
+      "sha256": "6df3a885a4e03ea9362ab131eb3d18d60801bd3dad278951a5e5bb09071e651f",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/idevicebackup2.exe",
+      "size_bytes": 138491,
+      "sha256": "d39b971386f36d6e370fc04051495f4411be4535ae258751de5f2ecb43df588f",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/idevicecrashreport.exe",
+      "size_bytes": 61198,
+      "sha256": "2d2944619419b236b77947e9734f4a1d43629fcd11b86d4f5b498e37e74759e7",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/idevicedate.exe",
+      "size_bytes": 49344,
+      "sha256": "eb1d57e9dfb4d52891c7bf1d8f0e9aa61a38828d027beb5b5f3e4aa57640c795",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/idevicedebug.exe",
+      "size_bytes": 53990,
+      "sha256": "329bbb30bda05a8119e32e1c4261a307bd9d0de4bba06bc848899e4846091013",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/idevicedebugserverproxy.exe",
+      "size_bytes": 61844,
+      "sha256": "8516d02b877e043cdaab4414c80533371aab3b73a191a4a222777170cdf9a75e",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/idevicediagnostics.exe",
+      "size_bytes": 51125,
+      "sha256": "4000ac0b2bd86882a14df51c202510aea792dabc5223a6e7d65b455ba8c61c8f",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/ideviceenterrecovery.exe",
+      "size_bytes": 46070,
+      "sha256": "734f645d402d2130cf772afc2dadab256d64b0cc1eccf0a9cea61cc8ab4056c0",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/ideviceimagemounter.exe",
+      "size_bytes": 103618,
+      "sha256": "78ff318f31b593e8bac009f658c5e50762379f9153c2c8f4a55e3361314409b5",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/ideviceinfo.exe",
+      "size_bytes": 62062,
+      "sha256": "61f8d3d9fdbd29762d303c53010fcb7cf53b3a8bfc6246790e01a34eb8263fdb",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/ideviceinstaller.exe",
+      "size_bytes": 81407,
+      "sha256": "b2c4e0ffe4964b14eb806dfa313478b7aa5f86a49c75e1eade0a953f2fba23bd",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/idevicename.exe",
+      "size_bytes": 50938,
+      "sha256": "52042fa0fb0e4eed7b98a92d607dedc7c1c228cae33e2b5e00ddea0b58ffa12d",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/idevicenotificationproxy.exe",
+      "size_bytes": 48545,
+      "sha256": "657d14d0018f8d6245cae870b8a0248ee4ccdf6a6b100b2538dd212137a4d391",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/idevicepair.exe",
+      "size_bytes": 72889,
+      "sha256": "67f1ab320bbfcb5ce078851f6b92537fdd9997c680da2f51dc2139ebfb68370e",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/ideviceprovision.exe",
+      "size_bytes": 102378,
+      "sha256": "cc2aeda68c4d7bedc2d71a161e8eea646bc4e44565d3bd57b052c88ea9591a47",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/idevicescreenshot.exe",
+      "size_bytes": 49210,
+      "sha256": "0ce5f047701bb8e5db2cf0c98cf355b8779ed677c79fd58f0f11ade57964a464",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/idevicesetlocation.exe",
+      "size_bytes": 50938,
+      "sha256": "9eaae59452e083920488478cac90155a95c46fd19cf0c46bd3e8463f9c862eb4",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/idevicesyslog.exe",
+      "size_bytes": 60762,
+      "sha256": "83e774f2cc793177a847c0b36c0c631e581d3bf1032901d0aa12c8ff1da29c58",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/libbz2-1.dll",
+      "size_bytes": 107741,
+      "sha256": "1790bf6473c9d48db14c1f0ee8124142327556d281299ea2a72ee361118ee01a",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/libcrypto-4-x64.dll",
+      "size_bytes": 5590344,
+      "sha256": "ff5bd426835acf70a03e6fd8bb51b60441806bf228de608caf4355b57f0c2340",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/libgcc_s_seh-1.dll",
+      "size_bytes": 150025,
+      "sha256": "44f6318f96eb2aaf6e90400bb1178ab6d55b01ae2cf24846d6b30d96e87e89dd",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/libimobiledevice-1.0.dll",
+      "size_bytes": 223698,
+      "sha256": "7e57f601ed44351895d10dd1a72fed44aea137f97ed32af51ee5e897987a14e5",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/libimobiledevice-glue-1.0.dll",
+      "size_bytes": 121152,
+      "sha256": "e687690485f1f8749c62000337effa6f04baf7f9a8ce56b74d7181691e291de1",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/liblzma-5.dll",
+      "size_bytes": 190872,
+      "sha256": "d97a260b8bb4f6affc34ec47249429240068b94bb6f7dc30c4d64daaafb3ac69",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/libplist-2.0.dll",
+      "size_bytes": 173158,
+      "sha256": "b4fbf69fa5b0c585dab5a466ebda760e4cc5881b1c593585e75d9dafadd5dc7c",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/libssl-4-x64.dll",
+      "size_bytes": 1148375,
+      "sha256": "879b67699f587b4e1c5ce23c444f587f01a4fbe10f0cdf0374414e37bd606331",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/libusbmuxd-2.0.dll",
+      "size_bytes": 68533,
+      "sha256": "6f7d37d888ff3144fc09e23f90702324e9a96685352b8f559679cdfb4c5d69f0",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/libwinpthread-1.dll",
+      "size_bytes": 73308,
+      "sha256": "94a9a4e2fe27b4bc827a4b209e9deb4cc3dc34bc025df06b849144f9d4c588f8",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/libz-1.dll",
+      "size_bytes": 148154,
+      "sha256": "934103c50623302548a1cf66fbc22f0029e4eb4556343252a505e2fc005e835f",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/libzip.dll",
+      "size_bytes": 169044,
+      "sha256": "f55da9e1f87309b7f882c9f08839595b6732af783771b4d378ca2ffe75218815",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/libzlibwapi.dll",
+      "size_bytes": 190835,
+      "sha256": "40ff3541220492655373ba47272daaa0c99d3978078473cb2cb8e96a9a003a9d",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/libzstd.dll",
+      "size_bytes": 1217412,
+      "sha256": "48368ab0ca622d0ec12f41ce85d91f22866bf5da92c77a69a06483564c93816c",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    },
+    {
+      "path": "Tools/libimobiledevice/zlib1.dll",
+      "size_bytes": 190835,
+      "sha256": "aa658771fb152b095eda1614d8bde798efb92324b6f4a0c99c743cd96b67ac90",
+      "pe_certificate_table_present": false,
+      "authenticode_trust": "not evaluated",
+      "upstream_package": "unverified",
+      "license": "unverified",
+      "provenance_evidence": "Tools/libimobiledevice/ABOUT THESE FILES.txt (assertion only)"
+    }
+  ]
+}

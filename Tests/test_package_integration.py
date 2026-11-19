@@ -119,6 +119,9 @@ class ExtractedStartupTests(unittest.TestCase):
         self.assertEqual(self.request(port, "/api/clean-caches", token, '{}')[0], 403)
         self.assertEqual(self.request(port, "/api/family-apply", token, '{}')[0], 403)
         self.assertEqual(self.request(port, "/api/recovery-action", token, '{}')[0], 403)
+        for invalid in ('[]', '[{"authorized":true}]', 'null', '{', '{"authorized":"true"}'):
+            self.assertEqual(self.request(port, "/api/consent", token, invalid)[0], 400)
+        self.assertEqual(self.request(port, "/api/consent", token, 'x' * 4097)[0], 413)
         self.assertEqual(self.request(port, "/api/consent", token, '{"authorized":true}')[0], 200)
         status, data = self.request(port, "/api/session", token)
         self.assertEqual(status, 200)

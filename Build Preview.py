@@ -18,6 +18,7 @@ PACKAGE_FILES = (
     "Docs/Preview Validation.md", "Docs/Three USB Modes.md", "Docs/Download and Run.md",
     "Docs/Bundled Binary Inventory.json",
     "Build Preview.py", "Tests/test_guest_boundary.py", "Tests/test_package_integration.py",
+    "Tests/test_scan_observations.py", "Docs/Windows Testing Checklist.md",
     "Tests/Guest Policy Tests.ps1",
 )
 

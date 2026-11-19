@@ -67,6 +67,13 @@ Back to Windows defaults is not restoration of the user's original configuration
 
 ## Results and known limitations
 
+Selected control observations now distinguish true, false and unknown. Failed macOS
+queries and unavailable Linux checks no longer automatically become disabled-state
+findings. Windows firewall needs all three readable profiles before returning true;
+missing Defender, UAC, BitLocker and Secure Boot observations remain unknown. This
+does not certify the other legacy evidence fields. A failed rescan clears the prior
+report so it cannot be exported as a current result.
+
 Existing checks are heuristic. Missing APIs/permissions can still produce incomplete
 or misleading legacy findings; the preview explicitly displays that limitation and
 does not present the old score as a protection percentage. A port or unsigned binary
@@ -111,6 +118,7 @@ questions and the required safety gates are resolved.
 - [Implementation order and grouped backlog](Docs/Implementation%20Plan.md)
 - [Safety testing and VM requirements](Docs/Safety%20Test%20Plan.md)
 - [Current preview validation and remaining work](Docs/Preview%20Validation.md)
+- [Windows checklist for owner and Claude](Docs/Windows%20Testing%20Checklist.md)
 - [Security reporting](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
 
@@ -124,6 +132,14 @@ checksum are written to Dist. Existing outputs are never overwritten; use a new
 
 Keep security updates, endpoint protection, backups and disk encryption in place.
 The toolkit is a learning and assessment aid, not a replacement for those controls.
+
+## Screenshots
+
+[View the preserved legacy v3.1 gallery](https://github.com/test3457890/PC-Security-Toolkit/blob/fix/portable-guest-boundary/Docs/Screenshots/README.md).
+Its nine images show the old dashboard with SIMULATED Windows data. They do not
+show this scan-only preview or prove Windows operations work. No new preview images
+were captured in this review because browser access to the local server was blocked.
+Use the Windows checklist to capture authentic preview screens without identifiers.
 
 ## Platform references
 

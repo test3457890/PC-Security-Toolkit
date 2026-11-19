@@ -38,6 +38,56 @@ artifact is uploaded only after all platform suites and PowerShell checks pass. 
 the matching CI run rather than assuming success from workflow presence. Standard-user
 Windows runtime, actual scans, physical media and elevated VM evidence remain unavailable.
 
+## November 19 engineering update
+
+The branch incorporates main's documentation and nine historical fixture images.
+The gallery is retained and explicitly labeled legacy/SIMULATED. No historical
+files were deleted or moved; references remain valid.
+
+Runtime changes distinguish missing/unrecognized/failed selected scan observations
+from false values. Windows firewall needs all three readable profiles; selected
+Defender/UAC/BitLocker/Secure Boot flags preserve unknowns. macOS command failures
+remain unknown. Linux does not infer root encryption from another encrypted device,
+infer effective firewall rules from service presence, or declare automatic updates
+disabled merely because no known service is active. Port findings request review.
+Other legacy fields still have incomplete availability semantics.
+
+The page displays selected control observations and clears old evidence on failed
+or malformed rescans. Server errors omit internal exception text. Origin checks
+match the validated Host, including localhost, without allowing cross-host origins.
+
+Local actual execution: 19 Python tests pass, including fixture HTTP, JavaScript VM,
+failure/unknown-state tests, package checks and extracted-server startup/shutdown.
+Fixtures do not constitute actual Windows/macOS scan execution. Windows parsing,
+pure policy/observation functions and extracted Windows startup require exact-commit
+CI confirmation. Real Windows scans, UI and hardware remain Not tested.
+
+An actual Linux container scan also completed in an isolated Python environment
+using an empty temporary HOME. All five selected control states were unknown and
+no findings were returned; this is incomplete coverage, not a clean security result.
+Toolkit file timestamps/list remained unchanged by the scan (Python bytecode
+caches excluded). This does not establish behavior on a normal desktop or prove
+the absence of operating-system traces or network activity.
+
+A local credential-pattern scan found zero matches across 105 historical Git
+blobs for private-key headers and selected GitHub/OpenAI/AWS key formats. This is
+a limited static scan, not a guarantee against secrets or personal information.
+All 34 bundled PE file sizes/hashes match the existing inventory; their origin,
+Authenticode trust, licenses and vulnerability status remain unverified. Runtime
+preview dependencies are Python standard library and Windows PowerShell; Node is
+needed for tests. No third-party package manifest/lockfile is present to audit.
+
+Browser visual testing was Blocked by the environment: the local preview could not
+be reached by the cloud browser, followed by a browser-policy denial. No new UI
+screenshots or visual verification are claimed. See the [Windows checklist](Windows%20Testing%20Checklist.md)
+for tests beginning November 25, 2026. No destructive operation was run.
+
+GitHub reports main protected; the connector cannot read protection details (403),
+so required checks/review enforcement are not fully verified. Repository visibility
+is public, default branch main, with no published releases or open ordinary issues
+at inspection. Existing drafts #1 and #2 remain review work; #3 is merged. The root
+has no license and the bundled binary provenance/dependency audit remains unresolved.
+
 ## Remaining release blockers
 
 1. Legacy standalone profiles, downloaded/generated legacy scripts and Recovery

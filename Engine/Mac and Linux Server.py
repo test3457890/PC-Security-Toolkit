@@ -87,6 +87,23 @@ def run_cmd(cmd, timeout=6):
         return ""
 
 
+def query_state(cmd, enabled, disabled, timeout=6):
+    """Return None for failed, missing or unfamiliar queries, never a false pass."""
+    try:
+        query = subprocess.run(cmd, shell=True, capture_output=True, text=True,
+                               timeout=timeout, check=False)
+        if query.returncode != 0:
+            return None
+        output = query.stdout.strip().lower()
+        if any(marker.lower() in output for marker in disabled):
+            return False
+        if any(marker.lower() in output for marker in enabled):
+            return True
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Shared pieces
 # ---------------------------------------------------------------------------
@@ -108,7 +125,8 @@ def disk_and_ram():
         free_ram = round(pages * page / 1024 ** 3, 2)
     else:
         try:
-            info = dict(re.findall(r"^(\w+):\s+(\d+)", open("/proc/meminfo").read(), re.M))
+            with open("/proc/meminfo", encoding="utf-8") as source:
+                info = dict(re.findall(r"^(\w+):\s+(\d+)", source.read(), re.M))
             total_ram = round(int(info.get("MemTotal", 0)) / 1024 ** 2, 2)
             free_ram = round(int(info.get("MemAvailable", 0)) / 1024 ** 2, 2)
         except Exception:
@@ -211,11 +229,11 @@ def low_disk_finding(findings):
 # macOS scan
 # ---------------------------------------------------------------------------
 def invoke_mac_scan():
-    fw = "enabled" in run_cmd("/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate").lower()
-    stealth = "enabled" in run_cmd("/usr/libexec/ApplicationFirewall/socketfilterfw --getstealthmode").lower()
-    fv = "FileVault is On" in run_cmd("fdesetup status")
-    gk = "assessments enabled" in run_cmd("spctl --status")
-    sip = "enabled" in run_cmd("csrutil status").lower()
+    fw = query_state("/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate", ["enabled"], ["disabled"])
+    stealth = query_state("/usr/libexec/ApplicationFirewall/socketfilterfw --getstealthmode", ["enabled"], ["disabled"])
+    fv = query_state("fdesetup status", ["FileVault is On"], ["FileVault is Off"])
+    gk = query_state("spctl --status", ["assessments enabled"], ["assessments disabled"])
+    sip = query_state("csrutil status", ["status: enabled"], ["status: disabled"])
     listening, outbound = lsof_ports()
     startup = []
     for folder in [os.path.expanduser("~/Library/LaunchAgents"), "/Library/LaunchAgents", "/Library/LaunchDaemons"]:
@@ -235,7 +253,7 @@ def invoke_mac_scan():
         (sip, 15, "CRITICAL", "System Integrity Protection is OFF", "Boot into macOS Recovery and run 'csrutil enable'."),
     ]
     for ok, pts, sev, title, fix in checks:
-        if not ok:
+        if ok is False:
             score -= pts
             findings.append({"severity": sev, "title": title, "fix": fix})
     if exts:
@@ -254,7 +272,8 @@ def svc_active(*names):
 
 def linux_os_name():
     try:
-        info = dict(re.findall(r'^(\w+)="?([^"\n]*)"?', open("/etc/os-release").read(), re.M))
+        with open("/etc/os-release", encoding="utf-8") as source:
+            info = dict(re.findall(r'^(\w+)="?([^"\n]*)"?', source.read(), re.M))
         return info.get("PRETTY_NAME", "Linux")
     except Exception:
         return "Linux"
@@ -263,19 +282,26 @@ def linux_os_name():
 def linux_secure_boot():
     for f in glob.glob("/sys/firmware/efi/efivars/SecureBoot-*"):
         try:
-            return open(f, "rb").read()[-1] == 1
+            with open(f, "rb") as source:
+                value = source.read()
+            if len(value) >= 5 and value[4] in (0, 1):
+                return value[4] == 1
         except Exception:
             pass
-    return "enabled" in run_cmd("mokutil --sb-state").lower()
+    return query_state("mokutil --sb-state", ["SecureBoot enabled"], ["SecureBoot disabled"])
 
 
 def invoke_linux_scan():
-    firewall = svc_active("ufw", "firewalld") or "Status: active" in run_cmd("ufw status 2>/dev/null")
-    encryption = "crypt" in run_cmd("lsblk -no TYPE 2>/dev/null")
+    # A service name or an unreadable ruleset cannot prove effective protection.
+    # Even an inactive ufw result says nothing about nftables or other managers.
+    ufw = query_state("ufw status", ["Status: active"], ["Status: inactive"])
+    firewalld = query_state("firewall-cmd --state", ["running"], ["not running"])
+    firewall = True if ufw is True or firewalld is True else None
+    # Finding any crypt device does not establish encryption of the host root.
+    encryption = None
     secure_boot = linux_secure_boot()
-    ssh_on = svc_active("ssh", "sshd")
-    auto_updates = svc_active("unattended-upgrades", "dnf-automatic.timer", "dnf-automatic-install.timer") or \
-        bool(glob.glob("/etc/apt/apt.conf.d/*unattended-upgrades")) and "1" in run_cmd("grep -h Unattended-Upgrade /etc/apt/apt.conf.d/20auto-upgrades 2>/dev/null")
+    ssh_on = True if svc_active("ssh", "sshd") else None
+    auto_updates = True if svc_active("unattended-upgrades", "dnf-automatic.timer", "dnf-automatic-install.timer") else None
     listening, outbound = ss_ports() if shutil.which("ss") else lsof_ports()
     startup = []
     for folder in [os.path.expanduser("~/.config/autostart"), "/etc/xdg/autostart"]:
@@ -295,23 +321,23 @@ def invoke_linux_scan():
     checks = [
         (firewall, 15, "HIGH", "No firewall is running", "Ubuntu/Mint: run 'sudo ufw enable'. Fedora: 'sudo systemctl enable --now firewalld'."),
         (encryption, 10, "MEDIUM", "The disk is not encrypted (no LUKS)", "Files can be read if the laptop is stolen. Encryption is chosen when installing Linux."),
-        (not ssh_on, 10, "MEDIUM", "An SSH server is running", "If you don't log in remotely: 'sudo systemctl disable --now ssh'."),
+        (False if ssh_on is True else None, 10, "MEDIUM", "An SSH server is running", "Review whether remote administration is intended before changing the service."),
         (auto_updates, 10, "HIGH", "Automatic security updates are off", "Ubuntu/Debian: 'sudo apt install unattended-upgrades'. Fedora: install dnf-automatic."),
         (secure_boot, 5, "LOW", "Secure Boot is off", "Turn it on in the UEFI/BIOS settings if your distribution supports it."),
     ]
     for ok, pts, sev, title, fix in checks:
-        if not ok:
+        if ok is False:
             score -= pts
             findings.append({"severity": sev, "title": title, "fix": fix})
     risky = [p for p in listening if p["LocalPort"] in (21, 23, 139, 445, 3306, 3389, 5432, 5900, 6379, 27017)]
     if risky:
         score -= 15
-        findings.append({"severity": "CRITICAL", "title": "Risky listening ports: " + ", ".join(f"{p['LocalPort']} ({p['Process']})" for p in risky), "fix": "Stop the service or block it with the firewall."})
+        findings.append({"severity": "MEDIUM", "title": "Listening services to review: " + ", ".join(f"{p['LocalPort']} ({p['Process']})" for p in risky), "fix": "May be intentional. Effective firewall exposure has not been measured; review with the device administrator."})
     if exts:
         score -= 5
         findings.append({"severity": "MEDIUM", "title": f"{len(exts)} tracking browser extensions found", "fix": "Remove Honey, Coupert or McAfee extensions."})
-    controls = {"firewall": firewall, "encryption": encryption, "secureBoot": secure_boot, "sshOff": not ssh_on, "autoUpdates": auto_updates}
-    return result(linux_os_name(), score, findings, controls, startup, listening, outbound, caches, exts, True)
+    controls = {"firewall": firewall, "encryption": encryption, "secureBoot": secure_boot, "sshOff": False if ssh_on is True else None, "autoUpdates": auto_updates}
+    return result(linux_os_name(), score, findings, controls, startup, listening, outbound, caches, exts, None)
 
 
 # ---------------------------------------------------------------------------
@@ -388,7 +414,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_json({"ok": False, "message": "Missing or wrong toolkit token. Reload the page."}, 403)
             return False
         origin = self.headers.get("Origin")
-        expected_origin = f"http://127.0.0.1:{self.server.server_address[1]}"
+        expected_origin = f"http://{self.headers.get('Host')}"
         if origin and origin != expected_origin:
             self.send_json({"ok": False, "code": "origin_denied", "message": "Origin denied."}, 403)
             return False
@@ -439,7 +465,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self.end_headers()
         except Exception as e:
             write_log("ERROR", f"{self.path} failed: {e}")
-            self.send_json({"ok": False, "message": f"Server error: {e}"}, 500)
+            self.send_json({"ok": False, "message": "Scan or request failed. No current result is available. Check device permissions and try again."}, 500)
 
     def do_POST(self):
         global SCAN_CONSENTED
@@ -515,7 +541,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self.send_json({"ok": False, "message": "This action is Windows-only. The scan, reports, logs and checklists work here."})
         except Exception as e:
             write_log("ERROR", f"{self.path} failed: {e}")
-            self.send_json({"ok": False, "message": f"Server error: {e}"}, 500)
+            self.send_json({"ok": False, "message": "Request failed. Check device permissions and try again."}, 500)
 
 
 def open_server(preferred_port=8765):

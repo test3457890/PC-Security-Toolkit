@@ -90,6 +90,21 @@ class GuestHTTPTests(unittest.TestCase):
         self.assertEqual(self.request("/api/scan", "POST", '{}')[0], 405)
         self.assertEqual(self.request("/api/shutdown", "GET")[0], 405)
 
+    def test_localhost_origin_matches_requested_host(self):
+        toolkit.ALLOWED_HOSTS.add(f"localhost:{self.port}")
+        self.assertEqual(self.request("/api/consent", "POST", '{"authorized":true}',
+                         {"Host": f"localhost:{self.port}", "Origin": f"http://localhost:{self.port}"})[0], 200)
+        self.assertEqual(self.request("/api/session", headers={"Origin": f"http://localhost:{self.port}"})[0], 403)
+
+    def test_scan_failure_is_an_error_without_private_exception_text(self):
+        self.request("/api/consent", "POST", '{"authorized":true}')
+        self.scan_mock.side_effect = RuntimeError("PRIVATE PATH")
+        self.mac_mock.side_effect = RuntimeError("PRIVATE PATH")
+        status, data = self.request("/api/scan")
+        self.assertEqual(status, 500)
+        self.assertNotIn(b"PRIVATE", data)
+        self.assertFalse(json.loads(data)["ok"])
+
     def test_bounded_json(self):
         self.assertEqual(self.request("/api/consent", "POST", 'x' * 4097)[0], 413)
         self.assertEqual(self.request("/api/consent", "POST", '{}', {"Transfer-Encoding": "chunked"})[0], 413)
@@ -142,7 +157,7 @@ const node = id => {
 };
 let captured;
 const calls=[];
-const fixture={hostname:'PRIVATE HOST',user:'PRIVATE USER',score:1,
+const fixture={hostname:'PRIVATE HOST',user:'PRIVATE USER',score:1,controls:{firewall:null},
   findings:[{severity:'HIGH',title:'PRIVATE SSID',fix:'PRIVATE PATH'}]};
 const context={document:{querySelector:()=>({content:'fixture-token'}),getElementById:node,
   documentElement:{dataset:{}},createElement:()=>node('temporary')},
@@ -166,6 +181,16 @@ vm.runInContext(SOURCE,context);
   node('redact').checked=false;
   node('export').click();
   assert.equal(captured.evidence.hostname,'PRIVATE HOST');
+  context.fetch=async()=>{throw new Error('fixture failure');};
+  await node('scan').click();
+  assert.equal(node('results').hidden,true,'failed rescan must hide old results');
+  assert.equal(node('evidence').textContent,'','failed rescan must clear private evidence');
+  captured=null;
+  node('export').click();
+  assert.equal(captured,null,'failed rescan must not export old report');
+  context.fetch=async(path)=>{calls.push(path);return {ok:true,json:async()=>({ok:true})};};
+  await node('scan').click();
+  assert.equal(node('results').hidden,true,'malformed scan is not a result');
   await node('stop').click();
   assert.equal(calls.at(-1),'/api/shutdown');
   assert.equal(node('evidence').textContent,'');

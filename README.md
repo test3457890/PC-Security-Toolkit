@@ -16,6 +16,18 @@ If you use a USB drive, keep the whole folder together and start the launcher ma
 
 ---
 
+## Screenshots
+
+Captured from the toolkit dashboard using a simulated Windows workstation. Scan results, file names, accounts, and recovery snapshots are sample data. No system changes were applied. [View all 9 screenshots](Docs/Screenshots/README.md).
+
+| Overview and security advisor | Privacy and network controls |
+| --- | --- |
+| [![Overview and security advisor](Docs/Screenshots/overview-and-advisor.webp)](Docs/Screenshots/overview-and-advisor.webp) | [![Privacy and network controls](Docs/Screenshots/privacy-and-network.webp)](Docs/Screenshots/privacy-and-network.webp) |
+
+| Family Plan controls | Recovery tools and sample snapshot |
+| --- | --- |
+| [![Family Plan controls](Docs/Screenshots/family-plan.webp)](Docs/Screenshots/family-plan.webp) | [![Recovery tools and sample snapshot](Docs/Screenshots/recovery-mode.webp)](Docs/Screenshots/recovery-mode.webp) |
+
 ## Why I made this
 
 Windows computers are a big target. Most of them run with settings that were chosen for convenience,

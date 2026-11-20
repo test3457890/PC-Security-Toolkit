@@ -2,18 +2,19 @@
 """
 Mac and Linux Server.py - PC Security Toolkit v3.1 local server for macOS and Linux.
 
-Binds ONLY to 127.0.0.1 (nothing on your network can reach it). Uses port 8765, or a
-random free port if 8765 is busy. Every API call needs the secret token that is written
-into the page at start-up, so other websites in your browser can't drive the toolkit.
+Binds to loopback with per-run API tokens and a scan-only request policy.
+Uses port 8765, or an available ephemeral port. Loopback does not protect against
+a compromised host or privileged browser extensions.
 
 macOS checks: FileVault, Firewall + Stealth Mode, Gatekeeper, SIP, LaunchAgents.
 Linux checks: firewall (ufw/firewalld/nftables), LUKS disk encryption, Secure Boot,
 SSH server, automatic security updates, autostart apps.
-Both: listening ports, outbound connections, big downloads, risky browser extensions,
-iPad / iPhone over USB, activity log, saved reports.
+Both: listening ports, outbound connections, big downloads and extension metadata.
+Legacy modification/export helpers remain in source but are denied by Guest Mode.
 """
 
 import datetime
+import argparse
 import glob
 import http.server
 import json
@@ -40,6 +41,21 @@ LOG_DIR = os.path.join(ROOT_DIR, "Logs", HOST)
 TOKEN = secrets.token_hex(32)
 PORT = 8765
 ALLOWED_HOSTS = set()
+SCAN_CONSENTED = False
+GUEST_ROUTES = {
+    "/api/settings": "GET", "/api/session": "GET", "/api/consent": "POST",
+    "/api/scan": "GET", "/api/shutdown": "POST",
+}
+
+
+def guest_decision(path, method, consented):
+    if path not in GUEST_ROUTES:
+        return 403, "guest_read_only"
+    if method != GUEST_ROUTES[path]:
+        return 405, "method_not_allowed"
+    if path == "/api/scan" and not consented:
+        return 409, "consent_required"
+    return 200, "allowed"
 
 KNOWN_RISKY = {
     "amnbcmdbanbkjhnfoeceemmmdiepnbpp": "Honey (Coupon/Cookie Tracker)",
@@ -54,24 +70,13 @@ KNOWN_RISKY = {
 # Activity log: Logs/<computer>/toolkit <date>.log (kept 30 days)
 # ---------------------------------------------------------------------------
 def write_log(level, message):
-    try:
-        os.makedirs(LOG_DIR, exist_ok=True)
-        now = datetime.datetime.now()
-        path = os.path.join(LOG_DIR, f"toolkit {now:%Y-%m-%d}.log")
-        with open(path, "a", encoding="utf-8") as f:
-            f.write(f"{now:%H:%M:%S} [{level}] {' | '.join(str(message).splitlines())}\n")
-    except Exception:
-        pass
+    # Guest Mode never persists toolkit logs.
+    return
 
 
 def prune_logs():
-    cutoff = datetime.datetime.now().timestamp() - 30 * 86400
-    for f in glob.glob(os.path.join(LOG_DIR, "*.log")):
-        try:
-            if os.path.getmtime(f) < cutoff:
-                os.remove(f)
-        except Exception:
-            pass
+    # Existing logs belong to prior sessions; do not delete them.
+    return
 
 
 def run_cmd(cmd, timeout=6):
@@ -80,6 +85,23 @@ def run_cmd(cmd, timeout=6):
         return out.strip()
     except Exception:
         return ""
+
+
+def query_state(cmd, enabled, disabled, timeout=6):
+    """Return None for failed, missing or unfamiliar queries, never a false pass."""
+    try:
+        query = subprocess.run(cmd, shell=True, capture_output=True, text=True,
+                               timeout=timeout, check=False)
+        if query.returncode != 0:
+            return None
+        output = query.stdout.strip().lower()
+        if any(marker.lower() in output for marker in disabled):
+            return False
+        if any(marker.lower() in output for marker in enabled):
+            return True
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -103,7 +125,8 @@ def disk_and_ram():
         free_ram = round(pages * page / 1024 ** 3, 2)
     else:
         try:
-            info = dict(re.findall(r"^(\w+):\s+(\d+)", open("/proc/meminfo").read(), re.M))
+            with open("/proc/meminfo", encoding="utf-8") as source:
+                info = dict(re.findall(r"^(\w+):\s+(\d+)", source.read(), re.M))
             total_ram = round(int(info.get("MemTotal", 0)) / 1024 ** 2, 2)
             free_ram = round(int(info.get("MemAvailable", 0)) / 1024 ** 2, 2)
         except Exception:
@@ -206,11 +229,11 @@ def low_disk_finding(findings):
 # macOS scan
 # ---------------------------------------------------------------------------
 def invoke_mac_scan():
-    fw = "enabled" in run_cmd("/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate").lower()
-    stealth = "enabled" in run_cmd("/usr/libexec/ApplicationFirewall/socketfilterfw --getstealthmode").lower()
-    fv = "FileVault is On" in run_cmd("fdesetup status")
-    gk = "assessments enabled" in run_cmd("spctl --status")
-    sip = "enabled" in run_cmd("csrutil status").lower()
+    fw = query_state("/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate", ["enabled"], ["disabled"])
+    stealth = query_state("/usr/libexec/ApplicationFirewall/socketfilterfw --getstealthmode", ["enabled"], ["disabled"])
+    fv = query_state("fdesetup status", ["FileVault is On"], ["FileVault is Off"])
+    gk = query_state("spctl --status", ["assessments enabled"], ["assessments disabled"])
+    sip = query_state("csrutil status", ["status: enabled"], ["status: disabled"])
     listening, outbound = lsof_ports()
     startup = []
     for folder in [os.path.expanduser("~/Library/LaunchAgents"), "/Library/LaunchAgents", "/Library/LaunchDaemons"]:
@@ -230,7 +253,7 @@ def invoke_mac_scan():
         (sip, 15, "CRITICAL", "System Integrity Protection is OFF", "Boot into macOS Recovery and run 'csrutil enable'."),
     ]
     for ok, pts, sev, title, fix in checks:
-        if not ok:
+        if ok is False:
             score -= pts
             findings.append({"severity": sev, "title": title, "fix": fix})
     if exts:
@@ -249,7 +272,8 @@ def svc_active(*names):
 
 def linux_os_name():
     try:
-        info = dict(re.findall(r'^(\w+)="?([^"\n]*)"?', open("/etc/os-release").read(), re.M))
+        with open("/etc/os-release", encoding="utf-8") as source:
+            info = dict(re.findall(r'^(\w+)="?([^"\n]*)"?', source.read(), re.M))
         return info.get("PRETTY_NAME", "Linux")
     except Exception:
         return "Linux"
@@ -258,19 +282,26 @@ def linux_os_name():
 def linux_secure_boot():
     for f in glob.glob("/sys/firmware/efi/efivars/SecureBoot-*"):
         try:
-            return open(f, "rb").read()[-1] == 1
+            with open(f, "rb") as source:
+                value = source.read()
+            if len(value) >= 5 and value[4] in (0, 1):
+                return value[4] == 1
         except Exception:
             pass
-    return "enabled" in run_cmd("mokutil --sb-state").lower()
+    return query_state("mokutil --sb-state", ["SecureBoot enabled"], ["SecureBoot disabled"])
 
 
 def invoke_linux_scan():
-    firewall = svc_active("ufw", "firewalld") or "Status: active" in run_cmd("ufw status 2>/dev/null")
-    encryption = "crypt" in run_cmd("lsblk -no TYPE 2>/dev/null")
+    # A service name or an unreadable ruleset cannot prove effective protection.
+    # Even an inactive ufw result says nothing about nftables or other managers.
+    ufw = query_state("ufw status", ["Status: active"], ["Status: inactive"])
+    firewalld = query_state("firewall-cmd --state", ["running"], ["not running"])
+    firewall = True if ufw is True or firewalld is True else None
+    # Finding any crypt device does not establish encryption of the host root.
+    encryption = None
     secure_boot = linux_secure_boot()
-    ssh_on = svc_active("ssh", "sshd")
-    auto_updates = svc_active("unattended-upgrades", "dnf-automatic.timer", "dnf-automatic-install.timer") or \
-        bool(glob.glob("/etc/apt/apt.conf.d/*unattended-upgrades")) and "1" in run_cmd("grep -h Unattended-Upgrade /etc/apt/apt.conf.d/20auto-upgrades 2>/dev/null")
+    ssh_on = True if svc_active("ssh", "sshd") else None
+    auto_updates = True if svc_active("unattended-upgrades", "dnf-automatic.timer", "dnf-automatic-install.timer") else None
     listening, outbound = ss_ports() if shutil.which("ss") else lsof_ports()
     startup = []
     for folder in [os.path.expanduser("~/.config/autostart"), "/etc/xdg/autostart"]:
@@ -290,23 +321,23 @@ def invoke_linux_scan():
     checks = [
         (firewall, 15, "HIGH", "No firewall is running", "Ubuntu/Mint: run 'sudo ufw enable'. Fedora: 'sudo systemctl enable --now firewalld'."),
         (encryption, 10, "MEDIUM", "The disk is not encrypted (no LUKS)", "Files can be read if the laptop is stolen. Encryption is chosen when installing Linux."),
-        (not ssh_on, 10, "MEDIUM", "An SSH server is running", "If you don't log in remotely: 'sudo systemctl disable --now ssh'."),
+        (False if ssh_on is True else None, 10, "MEDIUM", "An SSH server is running", "Review whether remote administration is intended before changing the service."),
         (auto_updates, 10, "HIGH", "Automatic security updates are off", "Ubuntu/Debian: 'sudo apt install unattended-upgrades'. Fedora: install dnf-automatic."),
         (secure_boot, 5, "LOW", "Secure Boot is off", "Turn it on in the UEFI/BIOS settings if your distribution supports it."),
     ]
     for ok, pts, sev, title, fix in checks:
-        if not ok:
+        if ok is False:
             score -= pts
             findings.append({"severity": sev, "title": title, "fix": fix})
     risky = [p for p in listening if p["LocalPort"] in (21, 23, 139, 445, 3306, 3389, 5432, 5900, 6379, 27017)]
     if risky:
         score -= 15
-        findings.append({"severity": "CRITICAL", "title": "Risky listening ports: " + ", ".join(f"{p['LocalPort']} ({p['Process']})" for p in risky), "fix": "Stop the service or block it with the firewall."})
+        findings.append({"severity": "MEDIUM", "title": "Listening services to review: " + ", ".join(f"{p['LocalPort']} ({p['Process']})" for p in risky), "fix": "May be intentional. Effective firewall exposure has not been measured; review with the device administrator."})
     if exts:
         score -= 5
         findings.append({"severity": "MEDIUM", "title": f"{len(exts)} tracking browser extensions found", "fix": "Remove Honey, Coupert or McAfee extensions."})
-    controls = {"firewall": firewall, "encryption": encryption, "secureBoot": secure_boot, "sshOff": not ssh_on, "autoUpdates": auto_updates}
-    return result(linux_os_name(), score, findings, controls, startup, listening, outbound, caches, exts, True)
+    controls = {"firewall": firewall, "encryption": encryption, "secureBoot": secure_boot, "sshOff": False if ssh_on is True else None, "autoUpdates": auto_updates}
+    return result(linux_os_name(), score, findings, controls, startup, listening, outbound, caches, exts, None)
 
 
 # ---------------------------------------------------------------------------
@@ -382,6 +413,19 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if self.path.startswith("/api/") and self.headers.get("X-Toolkit-Token") != TOKEN:
             self.send_json({"ok": False, "message": "Missing or wrong toolkit token. Reload the page."}, 403)
             return False
+        origin = self.headers.get("Origin")
+        expected_origin = f"http://{self.headers.get('Host')}"
+        if origin and origin != expected_origin:
+            self.send_json({"ok": False, "code": "origin_denied", "message": "Origin denied."}, 403)
+            return False
+        if self.command == "POST" and not origin:
+            self.send_json({"ok": False, "code": "origin_required", "message": "Same-origin browser request required."}, 403)
+            return False
+        if self.path.startswith("/api/"):
+            status, code = guest_decision(self.path, self.command, SCAN_CONSENTED)
+            if status != 200:
+                self.send_json({"ok": False, "code": code, "message": "Scan only. Confirm permission before scanning. Changes and persistent data are unavailable in this preview."}, status)
+                return False
         return True
 
     def do_GET(self):
@@ -389,7 +433,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
         try:
             if self.path in ("/", "/index.html"):
-                with open(os.path.join(ENGINE_DIR, "Live Toolkit.html"), "r", encoding="utf-8") as f:
+                with open(os.path.join(ENGINE_DIR, "Guest Dashboard.html"), "r", encoding="utf-8") as f:
                     data = f.read().replace("%%TOOLKIT-TOKEN%%", TOKEN).encode("utf-8")
                 self.send_response(200)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -403,7 +447,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 write_log("INFO", f"Scan finished: score {scan['score']}/100, {len(scan['findings'])} issue(s): " + "; ".join(f"[{f['severity']}] {f['title']}" for f in scan["findings"]))
                 self.send_json(scan)
             elif self.path == "/api/settings":
-                self.send_json({"theme": read_settings().get("theme", "midnight"), "platform": PLATFORM, "computer": HOST})
+                self.send_json({"theme": "midnight", "platform": PLATFORM, "mode": "guest", "persistence": False, "modification": False})
+            elif self.path == "/api/session":
+                self.send_json({"mode": "guest", "consented": SCAN_CONSENTED, "persistence": False, "modification": False,
+                                "usbModes": {"portable": "preview", "secureSession": "planned", "disposableWorkspace": "planned"}})
             elif self.path == "/api/mobile-scan":
                 self.send_json(invoke_mobile_scan())
             elif self.path == "/api/logs":
@@ -418,18 +465,38 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self.end_headers()
         except Exception as e:
             write_log("ERROR", f"{self.path} failed: {e}")
-            self.send_json({"ok": False, "message": f"Server error: {e}"}, 500)
+            self.send_json({"ok": False, "message": "Scan or request failed. No current result is available. Check device permissions and try again."}, 500)
 
     def do_POST(self):
+        global SCAN_CONSENTED
         if not self.guard():
             return
-        length = int(self.headers.get("Content-Length", 0) or 0)
         try:
+            length = int(self.headers.get("Content-Length", "-1"))
+        except ValueError:
+            length = -1
+        if length < 0 or length > 4096 or self.headers.get("Transfer-Encoding"):
+            self.send_json({"ok": False, "message": "Known request size of at most 4096 bytes required."}, 413)
+            return
+        if self.headers.get_content_type() != "application/json":
+            self.send_json({"ok": False, "message": "JSON required."}, 415)
+            return
+        try:
+            self.connection.settimeout(10)
             body = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+            if not isinstance(body, dict):
+                raise ValueError("JSON object required")
         except Exception:
-            body = {}
+            self.send_json({"ok": False, "message": "Invalid JSON request."}, 400)
+            return
         try:
-            if self.path == "/api/settings":
+            if self.path == "/api/consent":
+                if body.get("authorized") is not True:
+                    self.send_json({"ok": False, "message": "Permission to inspect this device is required."}, 400)
+                    return
+                SCAN_CONSENTED = True
+                self.send_json({"ok": True, "message": "Read-only scan authorized for this toolkit session."})
+            elif self.path == "/api/settings":
                 theme = str(body.get("theme", "midnight"))
                 if not re.fullmatch(r"[a-z]{2,20}", theme):
                     theme = "midnight"
@@ -474,13 +541,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self.send_json({"ok": False, "message": "This action is Windows-only. The scan, reports, logs and checklists work here."})
         except Exception as e:
             write_log("ERROR", f"{self.path} failed: {e}")
-            self.send_json({"ok": False, "message": f"Server error: {e}"}, 500)
+            self.send_json({"ok": False, "message": "Request failed. Check device permissions and try again."}, 500)
 
 
-def open_server():
+def open_server(preferred_port=8765):
     """Port 8765, or a random free port if it's busy. Always 127.0.0.1 only."""
     socketserver.TCPServer.allow_reuse_address = True
-    for port in [8765, 0, 0, 0]:
+    for port in [preferred_port, 0, 0, 0]:
         try:
             return socketserver.ThreadingTCPServer(("127.0.0.1", port), Handler)
         except OSError:
@@ -489,8 +556,16 @@ def open_server():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="PC Security Toolkit scan-only preview")
+    parser.add_argument("--no-browser", action="store_true", help="Print the URL without opening a browser")
+    parser.add_argument("--port", type=int, default=8765, help="Preferred loopback port; 0 selects an available port")
+    args = parser.parse_args()
+    if not 0 <= args.port <= 65535:
+        parser.error("port must be between 0 and 65535")
+    if not os.path.isfile(os.path.join(ENGINE_DIR, "Guest Dashboard.html")):
+        raise SystemExit("Incomplete toolkit: missing Guest Dashboard.html. Extract the complete package again.")
     prune_logs()
-    httpd = open_server()
+    httpd = open_server(args.port)
     PORT = httpd.server_address[1]
     ALLOWED_HOSTS.update({f"127.0.0.1:{PORT}", f"localhost:{PORT}"})
     url = f"http://127.0.0.1:{PORT}/"
@@ -498,7 +573,8 @@ if __name__ == "__main__":
     print(f"PC Security Toolkit ({PLATFORM}) running at {url}")
     print("Keep this window open while you use the dashboard. Press Ctrl+C to stop.")
     try:
-        webbrowser.open(url)
+        if not args.no_browser:
+            webbrowser.open(url)
     except Exception:
         pass
     try:

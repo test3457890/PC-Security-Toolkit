@@ -1,11 +1,21 @@
 # ==============================================================================
-# Toolkit Server.ps1 (v3.0) - Portable USB localhost server for Windows
-# Binds ONLY to http://127.0.0.1:8765/ (nothing on your network can reach it).
-# Every API call needs the secret token that is written into the page at start-up,
-# so other websites open in your browser cannot drive the toolkit.
+# Toolkit Server.ps1 - Scan-only safety preview based on the v3.1 source.
+# Binds to loopback. Do not expose it through proxies or port forwarding.
+# Per-run tokens, Host/Origin checks and a route allowlist reduce exposure;
+# they do not protect against a compromised host or privileged browser extension.
 # ==============================================================================
 
-$ErrorActionPreference = "SilentlyContinue"
+param([switch]$NoBrowser, [ValidateRange(1,65535)][int]$Port = 8765)
+
+# A missing safety policy must stop startup before any listener is created.
+$ErrorActionPreference = 'Stop'
+foreach ($required in @('Guest Policy.ps1','Guest Dashboard.html')) {
+    if (-not (Test-Path -LiteralPath (Join-Path $PSScriptRoot $required) -PathType Leaf)) { throw "Incomplete toolkit: missing $required. Extract the complete package again." }
+}
+. (Join-Path $PSScriptRoot 'Guest Policy.ps1')
+$ErrorActionPreference = 'SilentlyContinue'
+$script:scanConsented = $false
+$script:guestMode = $true
 # Use Windows PowerShell's own module folders even if started from a PowerShell 7 window.
 if ($PSVersionTable.PSEdition -ne 'Core') {
     $env:PSModulePath = @("$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowerShell\Modules", "$env:ProgramFiles\WindowsPowerShell\Modules", "$PSHOME\Modules") -join ';'
@@ -16,9 +26,8 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
 if ($ExecutionContext.SessionState.LanguageMode -ne 'FullLanguage') {
     Write-Host ''
     Write-Host '  Windows is running the toolkit in restricted mode, so it cannot start.' -ForegroundColor Yellow
-    Write-Host '  This happens when the files came from an internet ZIP download.' -ForegroundColor Yellow
-    Write-Host '  Fix: delete this folder, right-click the downloaded ZIP > Properties >' -ForegroundColor Gray
-    Write-Host '       tick "Unblock" > OK, then extract it again. (Or download it with "git clone".)' -ForegroundColor Gray
+    Write-Host '  Application control or administrator policy may require this mode.' -ForegroundColor Yellow
+    Write-Host '  Respect that restriction. Ask the device administrator for an approved option.' -ForegroundColor Gray
     Write-Host ''
     Read-Host 'Press Enter to close' | Out-Null
     exit
@@ -26,7 +35,6 @@ if ($ExecutionContext.SessionState.LanguageMode -ne 'FullLanguage') {
 
 $engineDir   = Split-Path -Parent $MyInvocation.MyCommand.Path
 $rootDir     = Split-Path -Parent $engineDir
-$port        = 8765
 $recovery    = Join-Path $engineDir 'Recovery.ps1'
 $logDir      = Join-Path $rootDir "Logs\$env:COMPUTERNAME"
 $configDir   = Join-Path $rootDir 'Config'
@@ -40,9 +48,9 @@ $script:familyUnlocked = $false
 # ------------------------------------------------------------------------------
 # Activity log: Logs\<PC name>\toolkit <date>.log (kept 30 days)
 # ------------------------------------------------------------------------------
-New-Item -ItemType Directory -Path $logDir -Force | Out-Null
-Get-ChildItem -LiteralPath $logDir -Filter '*.log' | Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-30) } | Remove-Item -Force
+# Guest Mode neither creates nor prunes toolkit logs.
 function Write-Log([string]$Level, [string]$Message) {
+    if ($script:guestMode) { return }
     $file = Join-Path $logDir ("toolkit {0}.log" -f (Get-Date -Format 'yyyy-MM-dd'))
     $line = "{0} [{1}] {2}" -f (Get-Date -Format 'HH:mm:ss'), $Level, ($Message -replace '[\r\n]+', ' | ')
     try { Add-Content -LiteralPath $file -Value $line -Encoding UTF8 } catch {}
@@ -55,15 +63,16 @@ function Write-Log([string]$Level, [string]$Message) {
 function Start-Listener([int]$p) {
     $l = New-Object System.Net.HttpListener
     $l.Prefixes.Add("http://127.0.0.1:$p/")
+    $l.TimeoutManager.EntityBody = [TimeSpan]::FromSeconds(10)
     try { $l.Start(); return $l } catch { return $null }
 }
 $listener = Start-Listener $port
 if (-not $listener) {
     try {
         $page = Invoke-WebRequest -Uri "http://127.0.0.1:$port/" -UseBasicParsing -TimeoutSec 3
-        if ($page.Content -match 'toolkit-token') {
+        if ($page.Content -match 'PC Security Toolkit \| Scan only') {
             Write-Host "The toolkit is already running - opening it in your browser." -ForegroundColor Green
-            Start-Process "http://127.0.0.1:$port/"
+            if (-not $NoBrowser) { Start-Process "http://127.0.0.1:$port/" }
             exit
         }
     } catch {}
@@ -76,16 +85,16 @@ if (-not $listener) {
     Write-Host "Port 8765 was busy, so the toolkit is using port $port instead." -ForegroundColor Yellow
 }
 $prefix = "http://127.0.0.1:$port/"
-Write-Log 'INFO' "Toolkit started on $prefix by $env:USERNAME (PowerShell $($PSVersionTable.PSVersion), $((Get-CimInstance Win32_OperatingSystem).Caption))"
+Write-Log 'INFO' 'Guest toolkit started.'
 
 Write-Host "==================================================================" -ForegroundColor Cyan
-Write-Host "  PC Security Toolkit v3.1 is running" -ForegroundColor Green
+Write-Host '  PC Security Toolkit: scan-only safety preview' -ForegroundColor Green
 Write-Host "  URL: $prefix" -ForegroundColor White
 Write-Host "  Keep this window open while you use the dashboard." -ForegroundColor Gray
-Write-Host "  If anything goes wrong, double-click 'RECOVERY MODE Windows.bat'." -ForegroundColor Gray
+Write-Host '  Changes and external tools are unavailable in this preview.' -ForegroundColor Gray
 Write-Host "==================================================================" -ForegroundColor Cyan
 
-Start-Process $prefix
+if (-not $NoBrowser) { Start-Process $prefix }
 
 # ------------------------------------------------------------------------------
 # Helpers
@@ -100,17 +109,17 @@ function Send-Json($res, $obj, [int]$status = 200) {
     $res.OutputStream.Write($bytes, 0, $bytes.Length)
     $res.Close()
     if ($obj -is [hashtable] -and $obj.ContainsKey('message') -and $script:currentPath -ne '/api/client-log') {
-        Write-Log $(if ($obj.ok) { 'INFO' } else { 'WARN' }) "$($script:currentPath): $($obj.message)"
+    Write-Log $(if ($obj.ok) { 'INFO' } else { 'WARN' }) "$($script:currentPath): $($obj.message)"
     }
 }
 
 function Read-Body($req) {
+    if ($req.ContentLength64 -lt 0 -or $req.ContentLength64 -gt 4096) { throw 'A known request size of at most 4096 bytes is required.' }
+    $reader = New-Object System.IO.StreamReader($req.InputStream, [System.Text.Encoding]::UTF8)
     try {
-        $reader = New-Object System.IO.StreamReader($req.InputStream, [System.Text.Encoding]::UTF8)
         $text = $reader.ReadToEnd()
-        if (-not $text) { return [pscustomobject]@{} }
-        return ($text | ConvertFrom-Json)
-    } catch { return [pscustomobject]@{} }
+        return (ConvertFrom-GuestJson $text)
+    } finally { $reader.Dispose() }
 }
 
 function Quote-PS([string]$s) { return "'" + ($s -replace "'", "''") + "'" }
@@ -250,13 +259,16 @@ function Invoke-FastScan {
     $doMode = (Get-ItemProperty "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization").DODownloadMode
 
     # New in v3: firewall, UAC, disk encryption, Secure Boot, updates, Wi-Fi, guest account
-    $fwOff = @(Get-NetFirewallProfile | Where-Object { "$($_.Enabled)" -ne 'True' } | ForEach-Object { $_.Name })
-    $uacOn = ((Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System').EnableLUA -eq 1)
+    $fwProfiles = @()
+    try { $fwProfiles = @(Get-NetFirewallProfile -ErrorAction Stop) } catch {}
+    $firewallOn = Get-ObservedFirewall $fwProfiles
+    $fwOff = @($fwProfiles | Where-Object { "$($_.Enabled)" -eq 'False' } | ForEach-Object { $_.Name })
+    $uacOn = Get-ObservedFlag (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System').EnableLUA
     $bl = $null
     try { $bl = (New-Object -ComObject Shell.Application).NameSpace('C:').Self.ExtendedProperty('System.Volume.BitLockerProtection') } catch {}
     $bitlockerOn = ($bl -in @(1, 3, 6))
     $bitlockerKnown = ($null -ne $bl -and $bl -ne 0)
-    $secureBoot = ((Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\State').UEFISecureBootEnabled -eq 1)
+    $secureBoot = Get-ObservedFlag (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\State').UEFISecureBootEnabled
     $sigAge = $mp.AntivirusSignatureAge
     $lastPatch = Get-CimInstance Win32_QuickFixEngineering | Where-Object { $_.InstalledOn } | Sort-Object InstalledOn -Descending | Select-Object -First 1
     $patchDays = $null
@@ -347,17 +359,17 @@ function Invoke-FastScan {
     $riskyPortList = @($listening | Where-Object { $_.LocalPort -in @(21, 22, 23, 139, 623, 3306, 3389, 5985, 8090, 16992, 33060) })
 
     if ($freePct -lt 10) { $score -= 20; $findings += @{ severity = "CRITICAL"; title = "Low SSD space ($freeGB GB / $freePct% free)"; fix = "Clean safe caches (Storage tab) and run SSD ReTrim." } }
-    if (-not $mp.RealTimeProtectionEnabled) { $score -= 25; $findings += @{ severity = "CRITICAL"; title = "Windows Defender Real-Time Protection is OFF"; fix = "Turn on Defender Real-Time, PUA and Network Protection (Script Builder)." } }
+    if ($null -ne $mp.RealTimeProtectionEnabled -and -not $mp.RealTimeProtectionEnabled) { $score -= 25; $findings += @{ severity = "HIGH"; title = "Defender reports Real-Time Protection off"; fix = "Review Windows Security and any other installed antivirus with the device administrator." } }
     if ($fwOff.Count -gt 0) { $score -= 15; $findings += @{ severity = "CRITICAL"; title = "Windows Firewall is OFF for: $($fwOff -join ', ')"; fix = "Open Windows Security > Firewall & network protection and turn every profile on." } }
-    if (-not $uacOn) { $score -= 15; $findings += @{ severity = "CRITICAL"; title = "User Account Control (UAC) is turned off"; fix = "Any program can silently get admin rights. Turn UAC back on in Control Panel > User Accounts." } }
-    if ($mpPref.EnableNetworkProtection -ne 1) { $score -= 10; $findings += @{ severity = "MEDIUM"; title = "Defender Network Protection disabled"; fix = "Enable Network Protection to block malicious domains across all apps." } }
+    if ($null -ne $uacOn -and -not $uacOn) { $score -= 15; $findings += @{ severity = "HIGH"; title = "User Account Control (UAC) is turned off"; fix = "Review Control Panel > User Accounts with the device administrator." } }
+    if ($null -ne $mpPref.EnableNetworkProtection -and $mpPref.EnableNetworkProtection -ne 1) { $score -= 10; $findings += @{ severity = "MEDIUM"; title = "Defender Network Protection is not in block mode"; fix = "Review the setting and applicable device policy." } }
     if ($null -ne $sigAge -and $sigAge -gt 7) { $score -= 8; $findings += @{ severity = "HIGH"; title = "Virus definitions are $sigAge days old"; fix = "Open Windows Security > Virus & threat protection > Check for updates." } }
     if ($null -ne $patchDays -and $patchDays -gt 45) { $score -= 10; $findings += @{ severity = "HIGH"; title = "No Windows updates installed for $patchDays days"; fix = "Open Settings > Windows Update and install everything." } }
     if ($wifi.connected -and $wifi.auth -eq 'Open') { $score -= 10; $findings += @{ severity = "HIGH"; title = "Connected to an OPEN Wi-Fi network with no password ($($wifi.ssid))"; fix = "Anyone nearby can see unencrypted traffic. Use a VPN or phone hotspot, and run Travel Mode." } }
     if ($llmnr -ne 0) { $score -= 10; $findings += @{ severity = "HIGH"; title = "LLMNR poisoning enabled"; fix = "Disable LLMNR (EnableMulticast = 0) for safe public Wi-Fi." } }
     if ($wifiNB -ne 2 -and $null -ne $wifiNB) { $score -= 10; $findings += @{ severity = "HIGH"; title = "NetBIOS enabled on Wi-Fi (port 139)"; fix = "Set TcpipNetbiosOptions = 2 on the Wi-Fi adapter." } }
     if ($bitlockerKnown -and -not $bitlockerOn) { $score -= 8; $findings += @{ severity = "MEDIUM"; title = "Drive C: is not encrypted (BitLocker / Device Encryption off)"; fix = "If this laptop is stolen, files can be read. Turn on BitLocker or Device Encryption in Settings." } }
-    if (-not $secureBoot) { $score -= 5; $findings += @{ severity = "MEDIUM"; title = "Secure Boot is off"; fix = "Turn Secure Boot on in the PC's UEFI/BIOS settings to block boot-level malware." } }
+    if ($null -ne $secureBoot -and -not $secureBoot) { $score -= 5; $findings += @{ severity = "MEDIUM"; title = "Secure Boot registry state is off"; fix = "Confirm firmware compatibility and recovery arrangements with the device administrator before changing firmware." } }
     if ($guestOn) { $score -= 8; $findings += @{ severity = "MEDIUM"; title = "The Guest account is enabled"; fix = "Disable it: net user Guest /active:no" } }
     if ($ntlm -ne 5) { $score -= 5; $findings += @{ severity = "MEDIUM"; title = "NTLMv1 downgrade allowed"; fix = "Enforce NTLMv2 only (LmCompatibilityLevel = 5)." } }
     if ($autorun -ne 255) { $score -= 8; $findings += @{ severity = "MEDIUM"; title = "USB AutoRun not disabled"; fix = "Set NoDriveTypeAutoRun = 255." } }
@@ -368,7 +380,7 @@ function Invoke-FastScan {
     if ($dailyAdmin) { $findings += @{ severity = "LOW"; title = "You use an administrator account every day"; fix = "Safer: a Standard account for daily use and a separate admin account. (Kids should always be Standard - see Family Plan.)" } }
     if ($riskyPortList.Count -gt 0) {
         $pStr = ($riskyPortList | ForEach-Object { "$($_.LocalPort) ($($_.Process))" }) -join ", "
-        $score -= 15; $findings += @{ severity = "CRITICAL"; title = "Risky listening ports: $pStr"; fix = "Block on public Wi-Fi or disable unused services." }
+        $score -= 15; $findings += @{ severity = "MEDIUM"; title = "Listening services to review: $pStr"; fix = "May be intentional. Effective firewall exposure has not been measured; review with the device administrator." }
     }
     if ($riskyExts.Count -gt 0) { $score -= 5; $findings += @{ severity = "MEDIUM"; title = "$($riskyExts.Count) tracking/bloatware browser extensions found"; fix = "Remove Honey, Coupert, McAfee, or untrusted PDF extensions." } }
     if ($ifeoHijacks.Count -gt 0 -or -not $sethcValid -or -not $utilmanValid) {
@@ -400,11 +412,11 @@ function Invoke-FastScan {
         sigAgeDays = $sigAge
         pendingReboot = $pendingReboot
         controls = @{
-            defenderRealTime = [bool]$mp.RealTimeProtectionEnabled
-            defenderNetProt = ($mpPref.EnableNetworkProtection -eq 1)
-            firewallOn = ($fwOff.Count -eq 0)
+            defenderRealTime = Get-ObservedFlag $mp.RealTimeProtectionEnabled $true
+            defenderNetProt = Get-ObservedFlag $mpPref.EnableNetworkProtection
+            firewallOn = $firewallOn
             uacOn = $uacOn
-            bitlockerOn = $bitlockerOn
+            bitlockerOn = $(if ($bitlockerKnown) { $bitlockerOn } else { $null })
             secureBootOn = $secureBoot
             llmnrOff = ($llmnr -eq 0)
             wifiNetbiosOff = ($wifiNB -eq 2)
@@ -650,7 +662,7 @@ try {
             if ($hostHeader -notin @("127.0.0.1:$port", "localhost:$port")) { $res.StatusCode = 403; $res.Close(); continue }
 
             if ($path -eq "/" -or $path -eq "/index.html") {
-                $htmlFile = Join-Path $engineDir "Live Toolkit.html"
+                $htmlFile = Join-Path $engineDir 'Guest Dashboard.html'
                 $content = (Get-Content -LiteralPath $htmlFile -Raw -Encoding UTF8).Replace('%%TOOLKIT-TOKEN%%', $token)
                 $bytes = [System.Text.Encoding]::UTF8.GetBytes($content)
                 $res.ContentType = "text/html; charset=utf-8"
@@ -665,10 +677,27 @@ try {
             if (-not $path.StartsWith('/api/')) { $res.StatusCode = 404; $res.Close(); continue }
             if ($req.Headers['X-Toolkit-Token'] -ne $token) { Send-Json $res @{ ok = $false; message = 'Missing or wrong toolkit token. Reload the page.' } 403; continue }
 
+            # No API, including an old dashboard or hand-crafted client, can bypass Guest Mode.
+            $origin = $req.Headers['Origin']
+            if ($origin -and $origin -cne "http://$hostHeader") { Send-Json $res @{ ok = $false; code = 'origin_denied'; message = 'Origin denied.' } 403; continue }
+            if ($method -eq 'POST' -and -not $origin) { Send-Json $res @{ ok = $false; code = 'origin_required'; message = 'Same-origin browser request required.' } 403; continue }
+            $decision = Get-GuestRequestDecision -Path $path -Method $method -Consented $script:scanConsented
+            if (-not $decision.Allowed) { Send-Json $res @{ ok = $false; code = $decision.Code; message = $decision.Message } $decision.Status; continue }
+
             $body = $null
-            if ($method -eq 'POST') { $body = Read-Body $req }
+            if ($method -eq 'POST') {
+                if ($req.ContentLength64 -lt 0 -or $req.ContentLength64 -gt 4096 -or $req.Headers['Transfer-Encoding']) { Send-Json $res @{ ok = $false; message = 'Request size not supported.' } 413; continue }
+                if ($req.ContentType -notmatch '^application/json(?:;|$)') { Send-Json $res @{ ok = $false; message = 'JSON required.' } 415; continue }
+                try { $body = Read-Body $req } catch { Send-Json $res @{ ok = $false; message = 'Invalid JSON request.' } 400; continue }
+            }
 
             switch ($path) {
+                '/api/session' { Send-Json $res @{ mode = 'guest'; consented = $script:scanConsented; persistence = $false; modification = $false; usbModes = @{ portable = 'preview'; secureSession = 'planned'; disposableWorkspace = 'planned' } } }
+                '/api/consent' {
+                    if ($body.authorized -isnot [bool] -or $body.authorized -ne $true) { Send-Json $res @{ ok = $false; message = 'Permission to inspect this device is required.' } 400; break }
+                    $script:scanConsented = $true
+                    Send-Json $res @{ ok = $true; message = 'Read-only scan authorized for this toolkit session.' }
+                }
                 '/api/scan' {
                     $sw = [Diagnostics.Stopwatch]::StartNew()
                     $scan = Invoke-FastScan
@@ -705,8 +734,7 @@ try {
                         Write-JsonFile $settingsFile @{ theme = $theme }
                         Send-Json $res @{ ok = $true }
                     } else {
-                        $s = Read-JsonFile $settingsFile
-                        Send-Json $res @{ theme = $(if ($s -and $s.theme) { $s.theme } else { 'midnight' }); platform = 'Windows'; computer = $env:COMPUTERNAME }
+                        Send-Json $res @{ theme = 'midnight'; platform = 'Windows'; mode = 'guest'; persistence = $false; modification = $false }
                     }
                 }
 
@@ -973,7 +1001,7 @@ Write-Host "Blocked inbound TCP port $p on public Wi-Fi." -ForegroundColor Green
             }
         } catch {
             Write-Log 'ERROR' "$path failed at line $($_.InvocationInfo.ScriptLineNumber): $($_.Exception.Message)"
-            try { Send-Json $res @{ ok = $false; message = "Server error: $($_.Exception.Message)" } 500 } catch {}
+            try { Send-Json $res @{ ok = $false; message = 'Scan or request failed. No current result is available. Check device permissions and try again.' } 500 } catch {}
         }
     }
 } finally {

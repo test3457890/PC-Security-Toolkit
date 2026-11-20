@@ -1,4 +1,9 @@
-# PC Security Toolkit screenshots
+# Legacy v3.1 dashboard screenshots
+
+These images are historical examples, not the current scan-only preview interface.
+The legacy action tabs shown here are unavailable through the preview launchers.
+SIMULATED Windows data does not establish actual Windows or hardware functionality.
+New preview screenshots remain blocked pending browser/Windows visual testing.
 
 Captured from the toolkit dashboard using a simulated Windows workstation. Scan results, file names, accounts, and recovery snapshots are sample data. No system changes were applied.
 

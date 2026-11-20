@@ -1,61 +1,34 @@
-PC SECURITY TOOLKIT v3.1
-========================
+PC SECURITY TOOLKIT: SCAN-ONLY SAFETY PREVIEW
 
-START
-  Windows:  double-click "START HERE Windows.bat"   (keep the black window open)
-  Mac:      double-click "START HERE Mac.command"
-  Linux:    run  bash "START HERE Linux.sh"
-  Broken?:  double-click "RECOVERY MODE Windows.bat" (works even if the dashboard won't open)
+Extract the complete ZIP before opening START HERE. Keep all Engine files together.
+See Docs/Download and Run.md for the complete preview download and checksum steps.
+No formatting or USB imaging is required for this scan-only folder.
 
-THEMES
-  Click "Themes" at the top: Classic Midnight, Hacker Terminal, Cyberpunk Neon,
-  Retro Amber, Deep Ocean, Daylight, High Contrast. Your pick is saved on the USB.
+Open START HERE for your OS, then confirm permission and choose Scan this PC.
+Windows basic checks use current-user permissions. Do not elevate Guest Mode.
+macOS/Linux require Python 3. Respect school/employer application controls.
 
-iPAD / iPHONE
-  Basic mode (works now): plug it in with a USB cable, unlock it, tap "Trust",
-  then open the "iPad, iPhone & Android" tab and click "Scan Connected Device".
-  Bluetooth does not count as plugged in.
+No automatic toolkit report/log/config writes. Themes last for this page only.
+Export JSON report explicitly downloads a file through the browser. Review it
+before sharing. OS/browser/network records may remain.
 
-  Full mode (iPadOS version, passcode check, storage, battery, backup encryption,
-  installed apps, and "Back up to this USB") needs two free extras:
-    1. The "Apple Devices" app from the Microsoft Store (Windows driver for iPads).
-    2. The libimobiledevice tools. ALREADY INCLUDED in Tools\libimobiledevice.
-  These tools are not code-signed, so PCs with Windows "Smart App Control" turned on
-  block them and the toolkit uses basic mode there. Leave Smart App Control on: turning
-  it off can't be undone without reinstalling Windows.
+Choose End session, confirm the launcher finishes, close the page and safely
+eject the USB. Closing the tab alone does not stop the server.
 
-FAMILY PLAN (parental controls)
-  1. Give each child their own Windows account and keep it a STANDARD account.
-  2. Open the "Family Plan" tab, set a parent PIN, tick the kids' accounts.
-  3. Pick what to block, add extra sites and search words, pick sign-in hours.
-  4. Click "Apply Family Plan". It keeps working after you unplug the USB.
-  For a child's iPad, follow the Screen Time steps shown in the same tab.
-  Forgot the PIN? Delete "Config\family settings.json" and set it up again.
+THREE USB ROLES
+1. Toolkit USB: manually open and scan. Preview implementation.
+2. Secure Session USB: automatic activation on an owned, enrolled Windows host.
+   Planned; no helper is installed or included in this preview.
+3. Disposable Workspace USB: restart and boot a separate temporary live OS.
+   Design only; no boot image included. No zero-trace or anonymity promise.
 
-RECOVERY MODE
-  Before the toolkit changes anything, it saves a snapshot of this PC's settings in
-  Backups\<PC name>\. In the "Recovery Mode" tab: Preview a snapshot, then Restore it.
-  "Back to Windows defaults" undoes everything even without a snapshot.
-  Also there: System Restore, Windows file repair, network reset, hosts reset,
-  panic button (cut internet), Safe Mode and the Windows Recovery Environment.
+Legacy modification features are unavailable through the preview dashboard.
+Standalone Profiles and the legacy Recovery launcher still modify Windows and
+remain unaudited. They are outside Guest Mode. Snapshots cannot undo everything,
+and restoring Windows defaults is different from restoring original settings.
 
-REPORTS AND LOGS
-  "Reports & Logs" tab: see what this PC is protected from (and what it isn't),
-  save a full report to Reports\, and read the activity log in Logs\<PC name>\
-  (every action, every script's full output, and any errors) if something goes wrong.
+Never disable OS protections, bypass device policies or clear audit logs to run
+the toolkit. A successful scan does not prove the computer is secure.
 
-SAFETY
-  The dashboard only works on this computer (127.0.0.1) and needs a new secret code
-  every time it starts, so nobody on your network or the internet can get in through it.
-
-DISCLAIMER
-  No security tool can promise 100% protection. Nothing connected to the internet is
-  ever completely safe. This toolkit's job is to make an attacker work harder and take
-  longer, and to help you notice when something is wrong so you can act. Keep updates
-  on, use strong passwords with 2-step sign-in, and keep backups. Use at your own risk.
-
-FOLDERS
-  Engine    the toolkit itself          Backups   recovery snapshots (one folder per PC)
-  Profiles  ready-made setup scripts    Config    your theme and Family Plan settings
-  Docs      guides                      Logs      activity logs (one folder per PC)
-  Tools     HitmanPro, adb, iPad tools  Reports   saved security reports
+Read README.md, Docs/Three USB Modes.md and Docs/Preview Validation.md for scope,
+test evidence, unfinished features and privacy limitations.

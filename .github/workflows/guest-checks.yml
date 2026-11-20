@@ -1,0 +1,35 @@
+name: Guest safety checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  guest-http:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Fixture HTTP and syntax tests
+        run: python -m unittest discover -s Tests -p "test_*.py" -v
+  powershell-policy:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Parse and test request policy without OS changes
+        shell: powershell
+        run: '& "./Tests/Guest Policy Tests.ps1"'
+  preview-package:
+    needs: [guest-http, powershell-policy]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Build curated source preview
+        run: python "Build Preview.py"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: PC Security Toolkit Preview
+          path: |
+            Dist/PC Security Toolkit Preview.zip
+            Dist/SHA256SUMS.txt
+          if-no-files-found: error

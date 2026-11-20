@@ -1,139 +1,149 @@
 # PC Security Toolkit
 
-A portable security, privacy and parental-controls dashboard that runs from a USB drive or any folder.
-It scans the computer, explains findings in plain English, and offers selected maintenance and hardening actions.
-Windows recovery snapshots cover selected settings. See [Recovery and backups](https://github.com/test3457890/PC-Security-Toolkit/wiki/Recovery-and-Backups) for what a snapshot can restore.
+A local, portable security assessment project for computer owners and learners.
+Current branch: scan-only safety preview, based on the documented v3.1 source.
+This is not a released v3.2 build or a validated hardening/recovery product.
 
-Works on **Windows 10/11** (Windows actions and recovery), **macOS** and **Linux** (platform scans, reports, logs, and guidance).
+## Start a read-only scan
 
-[Read the wiki](https://github.com/test3457890/PC-Security-Toolkit/wiki) for setup, features by platform, profiles, recovery, USB privacy limits, and troubleshooting.
+[Download the complete preview ZIP](https://github.com/test3457890/PC-Security-Toolkit/archive/refs/heads/fix/portable-guest-boundary.zip).
+The default main-branch ZIP still contains v3.1 until owner-reviewed merge. For a
+curated single-folder package with checksums and without legacy launchers or bundled
+binaries, use the latest successful CI artifact. See [Download and Run](Docs/Download%20and%20Run.md).
 
-If you use a USB drive, keep the whole folder together and start the launcher manually. The host can retain normal operating-system traces, and applied Windows settings persist until you restore them. See [USB use and privacy](https://github.com/test3457890/PC-Security-Toolkit/wiki/USB-Use-and-Privacy).
+Download or clone this branch, extract it, and open the launcher for your OS:
 
-> **No security tool can promise 100% protection.** Nothing connected to the internet is ever completely
-> safe, and this toolkit isn't either. Its job is to make an attacker work a lot harder, and to show you
-> what's going on so you can spot trouble early. [Read the full disclaimer.](#disclaimer)
+| System | Launcher | Requirement |
+|---|---|---|
+| Windows | `START HERE Windows.bat` | Windows PowerShell; basic checks use current-user permissions |
+| macOS | `START HERE Mac.command` | Python 3 |
+| Linux | `bash "START HERE Linux.sh"` | Python 3 |
 
----
+The launcher opens a local dashboard. Confirm that you own the computer or have
+permission to inspect it and that its policies allow this software, then choose
+Scan this PC. No scan starts automatically. Do not run as administrator for Guest
+Mode. If application controls block execution, stop and ask the administrator for
+an approved option. Do not disable Defender, Smart App Control, Secure Boot, firewall,
+UAC, updates or organization controls to run this project.
+
+The preview does not change OS controls, run elevated actions, install helpers,
+launch external tools or automatically save toolkit logs/config/reports. Themes
+last only for the page session. Export JSON report is an explicit browser download;
+the browser chooses its location. The restricted summary excludes raw evidence and
+free-text findings by allowlist. Review every export before sharing it.
+
+Choose End session, confirm the launcher finishes, close the page and safely eject
+the drive. Closing a browser tab alone does not stop the server. OS/browser/network
+records can remain. This software makes no zero-trace or anonymity guarantee.
+
+## Three separate USB roles
+
+| USB | Intended experience | Status |
+|---|---|---|
+| Toolkit USB | Open launcher, confirm permission, scan an authorized PC | Implemented as a preview; Windows runtime evidence pending |
+| Secure Session USB | Insert into an owned, enrolled Windows machine; a visible, deliberately installed helper verifies the credential and starts a reviewed temporary profile | Design only; no host helper or automatic activation included |
+| Disposable Workspace USB | Restart an authorized computer and boot a separate, nonpersistent live OS from USB | Design only; no boot image included |
+
+[Read the three USB specification](Docs/Three%20USB%20Modes.md). The third role is
+a separately booted OS proposal inspired by disposable live systems. It is not a
+Windows insert-and-erase feature. An ordinary USB cannot replace the running OS
+on insertion. No mode promises to erase audit logs or bypass managed-device rules.
+
+## What changed from v3.1
+
+The ordinary launchers now serve `Engine/Guest Dashboard.html`. Servers enforce a
+small route allowlist before the legacy dispatch code, require scan consent, check
+methods and browser Origin, and bound JSON request sizes. APIs for arbitrary scripts,
+cleanup, family/mobile changes, recovery, persistent reports/settings, external tools
+and AI are unavailable in this preview, including requests from the old dashboard.
+
+The legacy dashboard, profiles, recovery engine and optional feature code remain in
+the source for controlled migration. Their presence does not make them validated.
+Standalone profiles and the legacy Recovery launcher still modify Windows and are
+outside Guest Mode. Do not use them on borrowed/managed machines or rely on their
+snapshots for complete rollback. Broad snapshot restoration can overwrite later
+changes; deletions, software updates and several settings have incomplete/no undo.
+Back to Windows defaults is not restoration of the user's original configuration.
+
+## Results and known limitations
+
+Selected control observations now distinguish true, false and unknown. Failed macOS
+queries and unavailable Linux checks no longer automatically become disabled-state
+findings. Windows firewall needs all three readable profiles before returning true;
+missing Defender, UAC, BitLocker and Secure Boot observations remain unknown. This
+does not certify the other legacy evidence fields. A failed rescan clears the prior
+report so it cannot be exported as a current result.
+
+Existing checks are heuristic. Missing APIs/permissions can still produce incomplete
+or misleading legacy findings; the preview explicitly displays that limitation and
+does not present the old score as a protection percentage. A port or unsigned binary
+is not proof of malware. Some Windows queries require elevation; unavailable data
+must not be treated as a passed check. Improving per-check evidence and availability
+is a subsequent priority.
+
+Windows 10 standard support ended October 14, 2025. Edition-specific lifecycles and
+Extended Security Updates need separate verification. Scan capability does not imply
+OS support. The toolkit does not automatically upgrade Windows.
+
+The server binds to loopback and uses a fresh per-run API token. These reduce exposure,
+but do not establish that the project is invulnerable. Local processes/browser
+extensions and a compromised host remain relevant threats. Do not expose the server
+through port forwarding, a proxy or public hosting.
+
+No Windows VM restoration, physical USB-loss or elevated-action test evidence is
+available for this preview. The new Windows policy can be parsed and fixture-tested
+without changing security settings. CI checks are not a substitute for VM evidence.
+The package suite also tests actual platform server startup/API shutdown from an
+extracted ZIP, with spaces/non-English paths, without invoking host security scans.
+
+## Privacy and dependencies
+
+Scans read system settings, identifiers, processes, ports, startup entries, extension
+metadata and file names/sizes. They do not request document contents or BitLocker
+recovery keys. Results stay in the running page unless explicitly exported. OS and
+browser caches/logs are outside that promise. Do not clear logs to conceal activity.
+This preview does not invoke optional Ollama/mobile/proprietary utilities through
+the dashboard. Outbound behavior of the complete legacy toolkit and optional tools
+has not been independently packet-capture validated.
+
+The 34 bundled Windows binaries have a [local byte inventory](Docs/Bundled%20Binary%20Inventory.json).
+Upstream package provenance, licenses, notices and redistribution obligations remain
+unverified. No root software license has been selected. Public availability alone
+does not resolve redistribution rights. Do not publish a binary release until those
+questions and the required safety gates are resolved.
+
+## Development and review
+
+- [Verified source review](Docs/Safety%20Review.md)
+- [Implementation order and grouped backlog](Docs/Implementation%20Plan.md)
+- [Safety testing and VM requirements](Docs/Safety%20Test%20Plan.md)
+- [Current preview validation and remaining work](Docs/Preview%20Validation.md)
+- [Windows checklist for owner and Claude](Docs/Windows%20Testing%20Checklist.md)
+- [Security reporting](SECURITY.md)
+- [Contributing](CONTRIBUTING.md)
+
+Run `python -m unittest discover -s Tests -p "test_*.py" -v` with Python 3 and Node
+available. On Windows, run `powershell -NoProfile -File "Tests/Guest Policy Tests.ps1"`.
+These tests use fixture scans/pure request policies and do not modify OS controls.
+Runtime changes need the separately documented disposable-VM evidence before release.
+Build the curated source preview with `python "Build Preview.py"`. The ZIP and its
+checksum are written to Dist. Existing outputs are never overwritten; use a new
+`--output` folder for another build. No raw drives are opened, formatted or imaged.
+
+Keep security updates, endpoint protection, backups and disk encryption in place.
+The toolkit is a learning and assessment aid, not a replacement for those controls.
 
 ## Screenshots
 
-Captured from the toolkit dashboard using a simulated Windows workstation. Scan results, file names, accounts, and recovery snapshots are sample data. No system changes were applied. [View all 9 screenshots](Docs/Screenshots/README.md).
+[View the preserved legacy v3.1 gallery](https://github.com/test3457890/PC-Security-Toolkit/blob/fix/portable-guest-boundary/Docs/Screenshots/README.md).
+Its nine images show the old dashboard with SIMULATED Windows data. They do not
+show this scan-only preview or prove Windows operations work. No new preview images
+were captured in this review because browser access to the local server was blocked.
+Use the Windows checklist to capture authentic preview screens without identifiers.
 
-| Overview and security advisor | Privacy and network controls |
-| --- | --- |
-| [![Overview and security advisor](Docs/Screenshots/overview-and-advisor.webp)](Docs/Screenshots/overview-and-advisor.webp) | [![Privacy and network controls](Docs/Screenshots/privacy-and-network.webp)](Docs/Screenshots/privacy-and-network.webp) |
+## Platform references
 
-| Family Plan controls | Recovery tools and sample snapshot |
-| --- | --- |
-| [![Family Plan controls](Docs/Screenshots/family-plan.webp)](Docs/Screenshots/family-plan.webp) | [![Recovery tools and sample snapshot](Docs/Screenshots/recovery-mode.webp)](Docs/Screenshots/recovery-mode.webp) |
-
-## Why I made this
-
-Windows computers are a big target. Most of them run with settings that were chosen for convenience,
-not safety: old network features that leak password hashes on public Wi-Fi, remote-access services
-nobody uses, browser extensions that track everything, and protections like the firewall or Defender
-that can get switched off without anyone noticing. Attackers know those defaults well, and many
-break-ins don't need anything clever, just an unlocked door.
-
-Like a lot of people, I've watched the stream of hacks, scams and data leaks in the news and wanted a
-bit more peace of mind. Proper security tools are often expensive, confusing, or made for IT
-departments. I wanted something anyone could plug in, understand, and use:
-
-- **See it:** a plain-English list of what the computer is protected from, and what it isn't.
-- **Fix it:** review and apply selected actions. Confirm that a recovery snapshot was saved before changes and test the result.
-- **Watch it:** a report and an activity log, so if something odd happens you can see what changed and when.
-- **Protect the family:** parental controls, because kids are online earlier than ever.
-
-Use the findings as a starting point for reviewing the device. Available checks and actions depend on the operating system, installed tools, and permissions.
-
----
-
-## Is it safe? Can people get into my computer through this?
-
-The dashboard is a local web page intended for use on the computer where it runs:
-
-- The server listens on `127.0.0.1` (localhost), never on your network or the internet. Other devices,
-  even on the same Wi-Fi, can't connect to it.
-- Every time it starts, it creates a new random session token required for API calls. This helps restrict requests, but it is not a guarantee against a compromised host.
-- It uses port 8765, or a random free port if 8765 is busy, and it stops when you close the window.
-- Publishing source on GitHub does not itself expose a running local service. Do not forward or proxy the local port.
-- Anything that changes Windows settings needs you to click **Yes** on the Windows admin prompt,
-  and the toolkit attempts a recovery snapshot first. Confirm that it was saved.
-
-Don't "port forward" it or put it on a web host. It's designed to run only on your own computer.
-
----
-
-## Start it
-
-1. Download: green **Code** button > **Download ZIP** (or `git clone`).
-2. **Windows only:** before extracting, right-click the ZIP > **Properties** > tick **Unblock** > **OK**.
-   (Windows otherwise runs files from internet downloads in a restricted mode. The toolkit tells you if that happens.)
-3. Extract it, then double-click the file for your system:
-
-| System | Start the toolkit | If something goes wrong |
-|---|---|---|
-| Windows | `START HERE Windows.bat` | `RECOVERY MODE Windows.bat` |
-| Mac | `START HERE Mac.command` (first time: right-click > Open) | Time Machine / macOS Recovery |
-| Linux | `bash "START HERE Linux.sh"` | Timeshift / recovery boot |
-
-If Windows displays a security warning, verify the source and inspect the scripts before deciding whether to run them. Do not disable Defender or Smart App Control to make optional tools work.
-
-Mac and Linux need Python 3 (built into most Linux systems; on Mac run `xcode-select --install`).
-
----
-
-## Features
-
-| Tab | What it does |
-|---|---|
-| 📊 Overview & Advisor | Security score, issues found, offline Q&A advisor (uses a local Ollama AI if you have one) |
-| 💾 Storage | Cache sizes, old Windows upgrade files, big downloads, reviewable cleanup actions |
-| 🛡️ Backdoors, Ports & Extensions | Listening ports, programs online, startup apps, login-screen backdoor checks, tracking extensions |
-| 🔒 Privacy & Network | Live status of Defender, firewall, UAC, BitLocker, Secure Boot, Wi-Fi spoofing protections and privacy settings |
-| ⚙️ Script Builder | Pick a profile (Travel, School, Work, Gaming, Friend PC audit) and run or download the hardening script |
-| 📱 iPad, iPhone & Android | USB scan of iPads/iPhones (passcode, iPadOS version, storage, backups, apps) and Android apps |
-| 👨‍👩‍👧 Family Plan | Parental controls: Windows site and DNS filtering options, SafeSearch, sign-in schedules, and a parent PIN |
-| 🛟 Recovery Mode | Preview and restore selected settings from snapshots, apply toolkit defaults, use System Restore and repair tools |
-| 📄 Reports & Logs | "What you're protected from" report, saved HTML reports, and a full activity log for troubleshooting |
-
-Plus 7 themes: Classic Midnight, Hacker Terminal, Cyberpunk Neon, Retro Amber, Deep Ocean, Daylight and High Contrast.
-
-## Reports and logs
-
-- **Reports/** has saved security reports: detected controls and gaps, issues, ports,
-  startup apps and recent activity.
-- **Logs/<computer>/** has `toolkit <date>.log` with every action and error, plus a `run ...` / `recovery ...`
-  log with the complete output of every script that changed something. Logs older than 30 days are deleted automatically.
-- **Backups/<computer>/** holds settings snapshots. These are not copies of personal files or full disk images.
-
-These folders contain personal information about the computer, so they're excluded from Git (`.gitignore`).
-
-## Folders
-
-```
-Engine/    the toolkit (server, dashboard, recovery engine)
-Profiles/  ready-made Windows setup scripts
-Tools/     optional helpers: HitmanPro, adb, iPad tools (see Tools/README.md)
-Docs/      guides and setup prompts
-```
-
-## Disclaimer
-
-**There is no such thing as 100% security.** Any computer connected to the internet can be attacked, and
-no tool, including this one, can guarantee that a computer won't be hacked, infected or scammed.
-
-What this toolkit does is **raise the bar**: it closes common weaknesses, makes an attacker work harder and
-take longer, and helps you notice when something is wrong so you can act. Treat it as one layer of
-protection, not a guarantee. Keep doing the basics too:
-
-- Install Windows, app and phone updates promptly.
-- Use strong, unique passwords and a password manager, and turn on two-step sign-in (2FA) wherever you can.
-- Keep backups of anything you can't afford to lose, on a drive that isn't always plugged in.
-- Be suspicious of unexpected links, attachments, pop-ups and "tech support" calls.
-- If you think a computer has been compromised, disconnect it from the internet and get help from a professional.
-
-This toolkit changes security and system settings. It attempts to save a snapshot before changes, but you must confirm it succeeded. Recovery covers selected settings and may not undo every effect. Back up important files separately and use it at your own risk. Review what a script does (the Script Builder shows the full
-script) before running it. It is provided as-is, with no warranty of any kind, and the authors are not
-responsible for any damage, data loss or security incident.
+- [Windows 10 lifecycle](https://www.microsoft.com/en-us/windows/end-of-support)
+- [Microsoft AutoRun](https://learn.microsoft.com/en-us/windows/win32/shell/autoplay-reg)
+- [Debian Live](https://live-team.pages.debian.net/live-manual/html/live-manual.en.html)
+- [Tails limitations](https://tails.net/doc/about/warnings/index.en.html)

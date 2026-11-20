@@ -1,0 +1,32 @@
+name: Preview screenshot verification
+on:
+  push:
+    branches: [docs/preview-gallery]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser test dependency
+        run: npm install --no-save --ignore-scripts playwright@1.65.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Check preview UI and capture gallery
+        run: node Tests/capture_preview.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PC Security Toolkit Preview Screenshots
+          path: preview-screenshots/*.png
+          if-no-files-found: error

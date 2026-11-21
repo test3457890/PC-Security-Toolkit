@@ -1,7 +1,7 @@
 # Scan-only preview validation
 
-This branch implements the first runtime boundary after the source review. It is
-not completion of the entire backlog. Main must remain unchanged until owner review.
+Main implements the first runtime boundary after the source review. This is
+not completion of the entire backlog or validation of the older changing features.
 
 ## Implemented
 
@@ -77,16 +77,23 @@ Authenticode trust, licenses and vulnerability status remain unverified. Runtime
 preview dependencies are Python standard library and Windows PowerShell; Node is
 needed for tests. No third-party package manifest/lockfile is present to audit.
 
-Browser visual testing was Blocked by the environment: the local preview could not
-be reached by the cloud browser, followed by a browser-policy denial. No new UI
-screenshots or visual verification are claimed. See the [Windows checklist](Windows%20Testing%20Checklist.md)
-for tests beginning November 25, 2026. No destructive operation was run.
+## November 20 visual update
 
-GitHub reports main protected; the connector cannot read protection details (403),
-so required checks/review enforcement are not fully verified. Repository visibility
-is public, default branch main, with no published releases or open ordinary issues
-at inspection. Existing drafts #1 and #2 remain review work; #3 is merged. The root
-has no license and the bundled binary provenance/dependency audit remains unresolved.
+[Hosted Chromium run 44852281840](https://github.com/test3457890/PC-Security-Toolkit/actions/runs/44852281840)
+loaded the preview server, checked the consent gate and sample rendered controls,
+and captured three images for the [preview gallery](Screenshots/Preview/README.md).
+The sample results were intercepted with a visibly labeled CI test fixture. The
+mobile capture led to a readable stacked layout for the USB roles. These checks
+do not establish real Windows scanner, hardware, or USB behavior. The local browser
+could not access the executor's loopback server, so the hosted run was used for
+visual evidence. The main-branch guest safety check passed after the earlier
+preview merge. Device-specific testing remains in the
+[Windows checklist](Windows%20Testing%20Checklist.md).
+
+Repository visibility is public, default branch main, and no root license or
+binary release approval is implied. GitHub branch-protection details were not
+fully readable through the connector during the earlier review. Bundled binary
+provenance and redistribution obligations remain unresolved.
 
 ## Remaining release blockers
 
@@ -105,5 +112,5 @@ has no license and the bundled binary provenance/dependency audit remains unreso
 6. License, upstream binary provenance/obligations, encryption design, code signing,
    complete redacted HTML export and packet-capture review are still pending.
 
-No runtime security action is enabled merely because this PR or CI passes. Follow
-the reviewed implementation order and obtain owner review before each merge/release.
+No runtime security action is enabled merely because CI passes. Follow the
+implementation order and complete device-specific review before any release.

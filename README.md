@@ -1,17 +1,16 @@
 # PC Security Toolkit
 
 A local, portable security assessment project for computer owners and learners.
-Current branch: scan-only safety preview, based on the documented v3.1 source.
+Main branch: scan-only safety preview, based on the documented v3.1 source.
 This is not a released v3.2 build or a validated hardening/recovery product.
 
 ## Start a read-only scan
 
-[Download the complete preview ZIP](https://github.com/test3457890/PC-Security-Toolkit/archive/refs/heads/fix/portable-guest-boundary.zip).
-The default main-branch ZIP still contains v3.1 until owner-reviewed merge. For a
-curated single-folder package with checksums and without legacy launchers or bundled
+[Download the main branch source ZIP](https://github.com/test3457890/PC-Security-Toolkit/archive/refs/heads/main.zip).
+For a curated single-folder preview with checksums and without legacy launchers or bundled
 binaries, use the latest successful CI artifact. See [Download and Run](Docs/Download%20and%20Run.md).
 
-Download or clone this branch, extract it, and open the launcher for your OS:
+Download the curated preview or clone main, extract it, and open the launcher for your OS:
 
 | System | Launcher | Requirement |
 |---|---|---|
@@ -135,11 +134,19 @@ The toolkit is a learning and assessment aid, not a replacement for those contro
 
 ## Screenshots
 
-[View the preserved legacy v3.1 gallery](https://github.com/test3457890/PC-Security-Toolkit/blob/fix/portable-guest-boundary/Docs/Screenshots/README.md).
-Its nine images show the old dashboard with SIMULATED Windows data. They do not
-show this scan-only preview or prove Windows operations work. No new preview images
-were captured in this review because browser access to the local server was blocked.
-Use the Windows checklist to capture authentic preview screens without identifiers.
+These are captures from the actual scan-only preview in hosted Chromium. The sample
+results and mobile light-theme images use a labeled CI test fixture, not a scan of
+your computer. They do not verify the Windows launcher or USB behavior.
+
+![Consent screen of the scan-only preview](Docs/Screenshots/Preview/01%20Consent%20screen.webp)
+
+![Sample results with unknown controls and a visible test fixture label](Docs/Screenshots/Preview/02%20Sample%20results.webp)
+
+![Mobile layout in the light theme with labeled sample results](Docs/Screenshots/Preview/03%20Mobile%20light%20theme.webp)
+
+[View the preview gallery and capture details](Docs/Screenshots/Preview/README.md).
+The [legacy v3.1 gallery](Docs/Screenshots/README.md) has nine SIMULATED
+Windows examples of the old dashboard and does not represent the scan-only preview.
 
 ## Platform references
 

@@ -1,13 +1,13 @@
 # Download and run
 
-All implementation source and documentation are together on the
-`fix/portable-guest-boundary` branch while the owner reviews the PR. Main still
-contains the original v3.1 code until an explicit reviewed merge.
+The scan-only preview source and documentation are on main. The source tree also
+contains legacy code outside the preview boundary. Use the curated package when
+you want only the scan-only launchers and their required files.
 
 ## Choose one download
 
-- [Complete preview branch ZIP](https://github.com/test3457890/PC-Security-Toolkit/archive/refs/heads/fix/portable-guest-boundary.zip): contains the entire source tree, including legacy source. Extract everything first and use only START HERE for scan-only mode.
-- For a smaller, curated preview, open the latest successful [Guest safety checks run](https://github.com/test3457890/PC-Security-Toolkit/actions?query=branch%3Afix%2Fportable-guest-boundary). Under Artifacts, download `PC Security Toolkit Preview`. GitHub may require sign-in to download artifacts. The outer artifact ZIP contains the application ZIP and SHA256SUMS.txt. Extract both layers.
+- [Complete main branch source ZIP](https://github.com/test3457890/PC-Security-Toolkit/archive/refs/heads/main.zip): contains the entire source tree, including legacy source. Extract everything first and use only START HERE for scan-only mode.
+- For a smaller, curated preview, open the latest successful [Guest safety checks run](https://github.com/test3457890/PC-Security-Toolkit/actions/workflows/guest-checks.yml?query=branch%3Amain). Under Artifacts, download `PC Security Toolkit Preview`. GitHub may require sign-in to download artifacts. The outer artifact ZIP contains the application ZIP and SHA256SUMS.txt. Extract both layers.
 
 The curated package contains the three OS launchers, required engine files, dashboard,
 all review/status/USB guides and PACKAGE CONTENTS.json in one PC Security Toolkit
